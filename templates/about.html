@@ -1,158 +1,154 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>
-            About Us | SonicSentinel AI
-        </title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="/static/style.css">
-    </head>
-    <body>
-        <header class="topbar">
-            <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <a href="index.html" class="brand text-decoration-none">
-                    <span class="brand-icon">
-                        ♫
-                    </span>
-                    SonicSentinel
-                    <span class="accent">
-                        AI
-                    </span>
-                </a>
-                <nav class="tabs" aria-label="Main navigation">
-                    <a href="index.html">
-                        Home
-                    </a>
-                    <a href="upload.html">
-                        Upload
-                    </a>
-                    <a href="player.html">
-                        Audio Player
-                    </a>
-                    <a href="details.html">
-                        File Details
-                    </a>
-                    <a href="waveform.html">
-                        Waveform
-                    </a>
-                    <a href="microphone.html">
-                        Live Microphone
-                    </a>
-                    <a href="about.html" class="active" aria-current="page">
-                        About Us
-                    </a>
-                    <a href="login.html">
-                        Login
-                    </a>
-                    <a href="register.html">
-                        Register
-                    </a>
-                </nav>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>About Us | SonicSentinel AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <a href="{{ url_for('index') }}" class="brand text-decoration-none">
+                <span class="brand-icon">♫</span>
+                SonicSentinel <span class="accent">AI</span>
+            </a>
+
+            <nav class="tabs" aria-label="Main navigation">
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('upload') }}">Upload</a>
+                <a href="{{ url_for('player') }}">Audio Player</a>
+                <a href="{{ url_for('details') }}">File Details</a>
+                <a href="{{ url_for('waveform') }}">Waveform</a>
+                <a href="{{ url_for('microphone') }}">Live Microphone</a>
+                <a href="{{ url_for('about') }}" class="active" aria-current="page">About Us</a>
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container py-4 py-md-5">
+        <section id="about" class="tab-page active" aria-labelledby="aboutTitle">
+            <div class="page-intro">
+                <span class="eyebrow">THE PEOPLE BEHIND THE PROJECT</span>
+                <h1 id="aboutTitle">About Us</h1>
+                <p>We are a student team exploring sound analysis with AI and machine learning.</p>
             </div>
-        </header>
-        <main class="container py-4 py-md-5">
-            <section id="about" class="tab-page active" aria-labelledby="aboutTitle">
-                <div class="page-intro">
-                    <span class="eyebrow">
-                        THE PEOPLE BEHIND THE PROJECT
-                    </span>
-                    <h1 id="aboutTitle">
-                        About Us
-                    </h1>
-                    <p>
-                        We are a student team exploring sound analysis with AI and machine learning.
-                    </p>
-                </div>
-                <div class="panel mb-3">
-                    <h2>
-                        Our project
-                    </h2>
-                    <p class="mb-0">
-                        SonicSentinel AI brings audio upload, playback, file information and live waveform visualization into a simple workspace. Sound classification can be added when the trained model is ready.
-                    </p>
-                </div>
-                <h2 class="h4 mb-3">
-                    Meet the team
-                </h2>
-                <div class="team-grid">
-                    <div class="person">
-                        <span>
-                            01
-                        </span>
-                        <h3>
-                            Team Member 1
-                        </h3>
-                        <p>
-                            Student team member
-                        </p>
-                    </div>
-                    <div class="person">
-                        <span>
-                            02
-                        </span>
-                        <h3>
-                            Team Member 2
-                        </h3>
-                        <p>
-                            Student team member
-                        </p>
-                    </div>
-                    <div class="person">
-                        <span>
-                            03
-                        </span>
-                        <h3>
-                            Team Member 3
-                        </h3>
-                        <p>
-                            Student team member
-                        </p>
-                    </div>
-                    <div class="person">
-                        <span>
-                            04
-                        </span>
-                        <h3>
-                            Team Member 4
-                        </h3>
-                        <p>
-                            Student team member
-                        </p>
-                    </div>
-                    <div class="person">
-                        <span>
-                            05
-                        </span>
-                        <h3>
-                            Team Member 5
-                        </h3>
-                        <p>
-                            Student team member
-                        </p>
-                    </div>
-                    <div class="person mentor">
-                        <span>
-                            ★
-                        </span>
-                        <h3>
-                            Mentor
-                        </h3>
-                        <p>
-                            Project mentor
-                        </p>
-                    </div>
-                </div>
-                <p class="hint">
-                    Replace these placeholder names with your five members and mentor in index.html.
+
+            <div class="panel mb-4">
+                <h2>Our project</h2>
+                <p class="mb-0">
+                    SonicSentinel AI brings audio upload, playback, file information
+                    and live waveform visualization into a simple workspace.
+                    Sound classification can be added when the trained model is ready.
                 </p>
-            </section>
-            <footer>
-                © SonicSentinel AI · Student project prototype · Sound classification requires a trained model.
-            </footer>
-        </main>
-        <script src="app.js">
-        </script>
-    </body>
+            </div>
+
+            <div class="team-heading">
+                <span class="eyebrow">OUR TEAM</span>
+                <h2>Meet the team</h2>
+                <p>Get to know the people working on SonicSentinel AI.</p>
+            </div>
+
+            <article class="person">
+                <img src="{{ url_for('static', filename='images/mentor.jpg') }}" alt="Mentor" class="person-photo">
+                <div class="person-info">
+                    <span>Mentor</span>
+                    <h3>Mentor</h3>
+                    <p class="person-role">AI &amp; ML Developer</p>
+                    <p class="person-bio">
+                        Prepares sound data and explores machine learning models
+                        for recognizing different audio events.
+                    </p>
+                </div>
+            </article>  
+
+            <div class="team-grid">
+                <article class="person">
+                    <img src="{{ url_for('static', filename='images/img1.jpg') }}" alt="Team Member 1" class="person-photo">
+                    <div class="person-info">
+                        <span>MEMBER 01</span>
+                        <h3>Team Member 1</h3>
+                        <p class="person-role">Project Leader</p>
+                        <p class="person-bio">
+                            Coordinates the team, plans the project work and helps everyone
+                            stay focused on SonicSentinel AI's goals.
+                        </p>
+                    </div>
+                </article>
+
+                <article class="person">
+                    <img src="{{ url_for('static', filename='images/img2.jpg') }}" alt="Team Member 2" class="person-photo">
+                    <div class="person-info">
+                        <span>MEMBER 02</span>
+                        <h3>Team Member 2</h3>
+                        <p class="person-role">Frontend Developer</p>
+                        <p class="person-bio">
+                            Designs and builds the website pages so users can upload,
+                            play and explore audio easily.
+                        </p>
+                    </div>
+                </article>
+
+                <article class="person">
+                    <img src="{{ url_for('static', filename='images/img3.jpg') }}" alt="Team Member 3" class="person-photo">
+                    <div class="person-info">
+                        <span>MEMBER 03</span>
+                        <h3>Team Member 3</h3>
+                        <p class="person-role">Backend Developer</p>
+                        <p class="person-bio">
+                            Works on the server-side features, audio file handling
+                            and connections between different parts of the project.
+                        </p>
+                    </div>
+                </article>
+
+                <article class="person">
+                    <img src="{{ url_for('static', filename='images/img4.jpg') }}" alt="Team Member 4" class="person-photo">
+                    <div class="person-info">
+                        <span>MEMBER 04</span>
+                        <h3>Team Member 4</h3>
+                        <p class="person-role">Testing &amp; Documentation</p>   
+                        <p class="person-bio">
+                            Tests the website, records issues and documents the team's
+                            progress throughout the project.
+                        </p>
+                    </div>
+                </article>       
+
+                <article class="person">
+                    <img src="{{ url_for('static', filename='images/img5.jpg') }}" alt="Team Member 5" class="person-photo">
+                    <div class="person-info">
+                        <span>MEMBER 05</span>
+                        <h3>Team Member 5</h3>
+                        <p class="person-role">AI &amp; ML Developer</p> 
+                        <p class="person-bio">
+                            Prepares sound data and explores machine learning models
+                            for recognizing different audio events.
+                        </p>
+                    </div>
+                </article>
+
+                <article class="person">
+                    <img src="{{ url_for('static', filename='images/img6.jpg') }}" alt="Team Member 6" class="person-photo">
+                    <div class="person-info">
+                        <span>MEMBER 06</span>
+                        <h3>Team Member 6</h3>
+                        <p class="person-role">AI &amp; ML Developer</p>
+                        <p class="person-bio">
+                            Prepares sound data and explores machine learning models
+                            for recognizing different audio events.
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <footer>
+            © SonicSentinel AI · Student project prototype · Sound classification requires a trained model.
+        </footer>
+    </main>
+</body>
 </html>
