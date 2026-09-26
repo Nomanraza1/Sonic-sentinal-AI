@@ -16,3 +16,4 @@ def decide(py, gtm, quality, overlap):
     status = 'Alert Generated' if alert else ('Manual Review' if review else 'Classified')
     match = 'Acceptable Match' if agree and not review else ('Model Disagreement' if py['available'] and gtm['available'] and not agree else 'Uncertain Result')
     return {'final_class': label, 'severity': category['severity'], 'recommended_action': category['action'], 'manual_review': review, 'alert_status': status, 'agreement_status': match, 'confidence_difference': abs(py.get('confidence',0)-gtm.get('confidence',0)) if gtm['available'] else None, 'top_two_margin': margin, 'repeat_count': repeat}
+# verified

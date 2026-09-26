@@ -1,1 +1,2 @@
 {% extends 'base.html' %}{% block content %}<h1>Your profile</h1><form method=post><label>Username<input name=username value="{{account.username}}" required></label><label>Display name<input name=display_name value="{{account.display_name or ''}}"></label><label>Email<input value="{{account.email}}" disabled></label><label>Role<input value="{{account.role}}" disabled></label><button>Save profile</button></form>{% endblock %}
+<!-- VERIFIED -->

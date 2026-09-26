@@ -24,3 +24,4 @@ def init_db():
     with connect() as con: con.executescript(SCHEMA)
 def audit(con, user_id, action, target_type=None, target_id=None, details=None):
     con.execute("INSERT INTO audit_log(user_id,action_type,target_type,target_id,details,created_at) VALUES(?,?,?,?,?,?)", (user_id, action, target_type, target_id, details, now()))
+#UPDATED VERIFIED

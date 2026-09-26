@@ -30,3 +30,4 @@ python -m pytest
 ## Notes
 
 This is a controlled-test prototype, not a certified emergency-response system. Do not rely on it as the sole basis for an emergency decision.
+# verified

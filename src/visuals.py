@@ -21,3 +21,4 @@ def make_images(y, sr, audio_id, folder):
     ax.set(title='Mel spectrogram')
     fig.tight_layout(); fig.savefig(spectrogram, dpi=140); plt.close(fig)
     return waveform, spectrogram
+# verified

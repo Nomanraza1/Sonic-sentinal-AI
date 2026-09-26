@@ -13,3 +13,4 @@ document.querySelector('#start').onclick=async()=>{try{stream=await navigator.me
 document.querySelector('#stop').onclick=async()=>{clearInterval(window.liveTimer);await sendWindow();processor.disconnect();source.disconnect();stream.getTracks().forEach(x=>x.stop());await context.close();status.textContent='Paused.';start.disabled=false;stop.disabled=true};
 </script>
 {% endblock %}
+<!-- VERIIED -->

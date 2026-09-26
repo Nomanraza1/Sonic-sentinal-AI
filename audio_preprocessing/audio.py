@@ -46,3 +46,4 @@ def fingerprint_distance(one, two):
     if not one or not two or len(one) != len(two):
         return 999
     return sum(a != b for a, b in zip(one, two))
+# updaTED

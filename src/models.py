@@ -26,3 +26,4 @@ def predict_gtm(y, sr):
         label = max(scores, key=scores.get)
         return {'available': True, 'class': label, 'scores': scores, 'confidence': scores[label], 'version': 'gtm-model.keras'}
     except Exception as e: return unavailable(f'GTM load failed: {e}')
+# veriifed

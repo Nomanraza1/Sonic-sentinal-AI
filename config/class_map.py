@@ -5,3 +5,4 @@ SONIC_CLASSES = [
 ]
 
 DISPLAY_NAMES = {name: name.replace("_", " ").title() for name in SONIC_CLASSES}
+#UPDATED.PY

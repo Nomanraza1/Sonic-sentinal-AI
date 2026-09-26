@@ -1,1 +1,2 @@
 {% extends 'base.html' %}{% block content %}<h1>Manual review queue</h1>{% for r in rows %}<section><h2>{{r.filename}} - {{display.get(r.final_class,r.final_class)}}</h2><p>{{r.agreement_status}}; {{r.quality}}; {{r.severity}}</p><form method=post><input type=hidden name=detection_id value="{{r.detection_id}}"><label>Decision <input name=decision required></label><label>Comment <input name=comment></label><button>Save review</button></form></section>{% else %}<p>No pending reviews.</p>{% endfor %}{% endblock %}
+<!-- VERIFIED -->
