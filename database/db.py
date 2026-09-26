@@ -11,17 +11,38 @@ CREATE TABLE IF NOT EXISTS audit_log (audit_id INTEGER PRIMARY KEY, user_id INTE
 CREATE INDEX IF NOT EXISTS idx_audio_user ON audio_files(uploaded_by); CREATE INDEX IF NOT EXISTS idx_detection_audio ON detections(audio_id); CREATE INDEX IF NOT EXISTS idx_detection_created ON detections(created_at); CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id);
 """
 
-def now(): return datetime.now(timezone.utc).isoformat()
+
+def now():
+    return datetime.now(timezone.utc).isoformat()
+
+
 @contextmanager
 def connect():
     DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    con = sqlite3.connect(DATABASE_PATH); con.row_factory = sqlite3.Row
-    con.execute("PRAGMA foreign_keys = ON"); con.execute("PRAGMA journal_mode = WAL")
-    try: yield con; con.commit()
-    except: con.rollback(); raise
-    finally: con.close()
+    con = sqlite3.connect(DATABASE_PATH)
+    con.row_factory = sqlite3.Row
+    con.execute("PRAGMA foreign_keys = ON")
+    con.execute("PRAGMA journal_mode = WAL")
+    try:
+        yield con
+        con.commit()
+    except:
+        con.rollback()
+        raise
+    finally:
+        con.close()
+
+
 def init_db():
-    with connect() as con: con.executescript(SCHEMA)
+    with connect() as con:
+        con.executescript(SCHEMA)
+
+
 def audit(con, user_id, action, target_type=None, target_id=None, details=None):
-    con.execute("INSERT INTO audit_log(user_id,action_type,target_type,target_id,details,created_at) VALUES(?,?,?,?,?,?)", (user_id, action, target_type, target_id, details, now()))
-#UPDATED VERIFIED
+    con.execute(
+        "INSERT INTO audit_log(user_id,action_type,target_type,target_id,details,created_at) VALUES(?,?,?,?,?,?)",
+        (user_id, action, target_type, target_id, details, now()),
+    )
+
+
+# UPDATED VERIFIED

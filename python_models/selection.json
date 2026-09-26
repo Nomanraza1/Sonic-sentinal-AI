@@ -1,0 +1,18 @@
+{
+  "selected": "gradient_boosting",
+  "selection_metric": "validation macro_f1",
+  "available_classes": [
+    "machinery_fault",
+    "glass_breaking",
+    "alarm_siren",
+    "vehicle_horn",
+    "animal_sound",
+    "gunshot",
+    "panic_scream",
+    "aggression",
+    "background_noise"
+  ],
+  "missing_classes": [
+    "person_asking_for_help"
+  ]
+}
