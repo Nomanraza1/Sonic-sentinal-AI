@@ -13,8 +13,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 
-
-# 1. USERS TABLE
+# 1. USERS TABLE (Only 'users' table will be created and used)
 class User(UserMixin, db.Model):
     __tablename__ = 'users'  
     
@@ -22,17 +21,16 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(150), unique=True, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
-    role = db.Column(
-        db.String(50), 
-        db.CheckConstraint("role IN ('user', 'reviewer', 'operator', 'maintenance', 'admin')"), 
-        nullable=False, 
-        default='user'
-    )
+    role = db.Column(db.String(50), nullable=False, default='user')
     
-    # Flask-Login ke liye compatibility property
-    @property
-    def id(self):
-        return self.user_id
+    # Check constraint for valid roles
+    __table_args__ = (
+        db.CheckConstraint("role IN ('user', 'reviewer', 'operator', 'maintenance', 'admin')", name="check_user_role"),
+    )
+
+    # Flask-Login ke liye user_id compatibility
+    def get_id(self):
+        return str(self.user_id)
     
     # Relationships
     audio_files = db.relationship('AudioFile', backref='uploader', lazy=True)
@@ -94,7 +92,8 @@ class AuditLog(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    # Updated to db.session.get to fix LegacyAPIWarning
+    return db.session.get(User, int(user_id))
 
 
 # ================= PAGES ROUTES =================
