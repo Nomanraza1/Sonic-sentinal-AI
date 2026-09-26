@@ -1,7 +1,32 @@
-# SonicSentinel AI — separate HTML pages
+# SonicSentinel AI
 
-Open `index.html` for Home. The other eight pages are `upload.html`, `player.html`, `details.html`, `waveform.html`, `microphone.html`, `about.html`, `login.html` and `register.html`. All pages share `style.css` and `app.js`.
+Flask prototype for uploaded and live acoustic-event monitoring. It classifies the ten SRS categories with independently loaded Python and Google Teachable Machine models, compares their scores, applies configurable safety rules, and records events in SQLite.
 
-For best results, run a local server in this folder: `python -m http.server 8000`, then open `http://localhost:8000/`. Audio selection uses browser IndexedDB so a selected file stays available when navigating between pages. The browser may restrict large files or unsupported audio formats.
+## Setup
 
-Login/Register are a frontend demonstration. Registration data is held in browser session storage; there is no backend, database or protected access. Never enter a real password. Add a server-side authentication system for real accounts.
+Use Python 3.11 or newer, then run:
+
+```powershell
+pip install -r requirements.txt
+python app.py
+```
+
+Open `http://127.0.0.1:5000`. Register an account first. Use Upload for WAV, MP3, FLAC, OGG, or M4A recordings (25 MB maximum, 0.2-30 seconds). Live microphone access always requires browser permission and is visibly indicated.
+
+## Models
+
+Set `ACTIVE_PYTHON_MODEL` in `config/settings.py` to choose the saved scikit-learn model. Put its `.joblib` artifact and metrics JSON in `python_models/`. Put the converted GTM Keras artifact at `gtm_model/model.keras` and its ordered labels in `gtm_model/labels.json`; see `state.md` for the exact contract.
+
+## Testing
+
+```powershell
+python -m pytest
+```
+
+## Structure
+
+`app.py` contains Flask routes. Processing lives in `audio_preprocessing/` and `feature_extraction/`; `src/` contains independent model and decision adapters; `database/` contains SQLite setup; `alert_rules/` contains configurable rules; `tests/` holds checks. `audio_dataset/` is preserved from the supplied workspace.
+
+## Notes
+
+This is a controlled-test prototype, not a certified emergency-response system. Do not rely on it as the sole basis for an emergency decision.
