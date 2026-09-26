@@ -98,82 +98,72 @@ def load_user(user_id):
 
 # ================= PAGES ROUTES =================
 
+app=Flask(__name__); app.config['SECRET_KEY']='change-this-secret-before-deployment'; UPLOAD_DIR.mkdir(exist_ok=True)
+def login_required(f):
+ @wraps(f)
+ def w(*a,**k):
+  if not session.get('user_id'): return redirect(url_for('login'))
+  return f(*a,**k)
+ return w
+def roles(*ok):
+ def d(f):
+  @wraps(f)
+  def w(*a,**k):
+   if session.get('role') not in ok: abort(403)
+   return f(*a,**k)
+  return w
+ return d
+def viewer(): return {'user_id':session.get('user_id'),'username':session.get('username'),'role':session.get('role')}
+def analyze_file(item, live=False):
+ raw=item.read(); info=validate_upload(item.filename,raw); digest=hashlib.sha256(raw).hexdigest()
+ path=UPLOAD_DIR/f'{digest[:16]}_{Path(item.filename).name}'; path.write_bytes(raw)
+ y,sr=load_audio(str(path)); audio_fingerprint=fingerprint(y,sr)
+ with connect() as c:
+  old=c.execute('SELECT audio_id FROM audio_files WHERE file_hash=?',(digest,)).fetchone()
+  if old and not live: raise ValueError(f'Duplicate of audio #{old["audio_id"]}.')
+  matches=c.execute('SELECT audio_id,perceptual_hash FROM audio_files WHERE perceptual_hash IS NOT NULL').fetchall()
+  nearest=min(((fingerprint_distance(audio_fingerprint,row['perceptual_hash']),row['audio_id']) for row in matches), default=(999,None))
+  cur=c.execute('INSERT INTO audio_files(uploaded_by,filename,stored_path,duration_s,sample_rate,channels,bit_depth,file_size,is_original,status,file_hash,perceptual_hash,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',(session['user_id'],item.filename,str(path),info.duration,info.samplerate,info.channels,str(getattr(info,'subtype','')),len(raw),1,'Uploaded',digest if not live else None,audio_fingerprint,now()))
+  audio_id=cur.lastrowid; audit(c,session['user_id'],'microphone_session' if live else 'upload','audio_file',audio_id)
+  if nearest[0] <= 8: audit(c,session['user_id'],'near_duplicate','audio_file',audio_id,f'Near audio #{nearest[1]}, distance {nearest[0]}')
+ grade,details=quality(y); records=[]
+ for clip,start,end in segments(y,sr):
+  py=predict_python(extract_features(clip,sr)); gtm=predict_gtm(clip,sr); overlap=sum(x>=.25 for x in py.get('scores',{}).values())>=2; result=decide(py,gtm,grade,overlap)
+  if nearest[0] <= 8: result['manual_review']=True; result['alert_status']='Manual Review'; result['recommended_action'] += ' Check possible near-duplicate audio.'
+  records.append((store(audio_id,start,end,py,gtm,grade,details,overlap,result),result))
+ return records
+def store(audio_id, start, end, py, gtm, grade, details, overlap, result):
+ with connect() as c:
+  q='''INSERT INTO detections(audio_id,segment_start,segment_end,python_class,python_scores,python_model_version,gtm_class,gtm_scores,gtm_model_version,agreement_status,confidence_difference,top_two_margin,quality,quality_details,overlap_detected,final_class,severity,alert_status,recommended_action,manual_review,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
+  cur=c.execute(q,(audio_id,start,end,py.get('class'),json.dumps(py.get('scores',{})),py.get('version'),gtm.get('class'),json.dumps(gtm.get('scores',{})),gtm.get('version'),result['agreement_status'],result['confidence_difference'],result['top_two_margin'],grade,json.dumps(details),overlap,result['final_class'],result['severity'],result['alert_status'],result['recommended_action'],result['manual_review'],now()))
+  audit(c,session.get('user_id'),'prediction','detection',cur.lastrowid)
+  if result['alert_status']=='Alert Generated': audit(c,session.get('user_id'),'alert','detection',cur.lastrowid)
+  return cur.lastrowid
 @app.route('/')
 def index():
-    return render_template('index.html')
-
-@app.route('/upload')
-def upload():
-    return render_template('upload.html')
-
-@app.route('/player')
-def player():
-    return render_template('player.html')
-
-@app.route('/details')
-def details():
-    return render_template('details.html')
-
-@app.route('/waveform')
-def waveform():
-    return render_template('waveform.html')
-
-@app.route('/microphone')
-def microphone():
-    return render_template('microphone.html')
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-
-# ================= AUTHENTICATION ROUTES =================
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        user = User.query.filter_by(email=email).first()
-        if user and check_password_hash(user.password_hash, password):
-            login_user(user)
-            flash('Success: Welcome back!', 'success')
-            return redirect(url_for('index'))
-        else:
-            flash('Error: Invalid email or password.', 'danger')
-
-    return render_template('login.html')
-
-@app.route('/register', methods=['GET', 'POST'])
+ with connect() as c: rows=c.execute('SELECT * FROM detections ORDER BY created_at DESC LIMIT 10').fetchall()
+ return render_template('index.html',rows=rows,display=DISPLAY_NAMES,user=viewer())
+@app.route('/register',methods=['GET','POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-
-    if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        user_exists = User.query.filter_by(email=email).first()
-        if user_exists:
-            flash('Email already registered!', 'danger')
-            return redirect(url_for('register'))
-
-        hashed_password = generate_password_hash(password, method='scrypt')
-        new_user = User(username=username, email=email, password_hash=hashed_password, role='user')
-        db.session.add(new_user)
-        db.session.commit()
-
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('login'))
-
-    return render_template('register.html')
-
+ if request.method=='POST':
+  try:
+   role=request.form.get('role','user'); role=role if role in {'user','reviewer','operator','maintenance','admin'} else 'user'
+   with connect() as c:
+    cur=c.execute('INSERT INTO users(username,email,password_hash,role,created_at,updated_at) VALUES(?,?,?,?,?,?)',(request.form['username'].strip(),request.form['email'].lower().strip(),generate_password_hash(request.form['password']),role,now(),now())); audit(c,cur.lastrowid,'registration','user',cur.lastrowid)
+   flash('Account created. Please sign in.','success'); return redirect(url_for('login'))
+  except Exception: flash('Username or email already exists.','error')
+ return render_template('register.html',user=viewer())
+@app.route('/login',methods=['GET','POST'])
+def login():
+ if request.method=='POST':
+  with connect() as c:
+   row=c.execute('SELECT * FROM users WHERE email=?',(request.form['email'].lower().strip(),)).fetchone()
+   if row and check_password_hash(row['password_hash'],request.form['password']): session.update(user_id=row['user_id'],username=row['username'],role=row['role']); audit(c,row['user_id'],'login','user',row['user_id']); return redirect(url_for('index'))
+   audit(c,None,'failed_login',details=request.form.get('email')); flash('Invalid email or password.','error')
+ return render_template('login.html',user=viewer())
 @app.route('/logout')
+def logout(): session.clear(); return redirect(url_for('index'))
+@app.route('/profile',methods=['GET','POST'])
 @login_required
 def logout():
     logout_user()

@@ -1,79 +1,15 @@
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Live Microphone | SonicSentinel AI</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    </head>
-    <body>
-        <header class="topbar">
-            <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <a href="{{ url_for('index') }}" class="brand text-decoration-none">
-                    <span class="brand-icon">♫</span>
-                    SonicSentinel
-                    <span class="accent">AI</span>
-                </a>
-                <nav class="tabs" aria-label="Main navigation">
-                    <a href="{{ url_for('index') }}">Home</a>
-                    <a href="{{ url_for('upload') }}">Upload</a>
-                    <a href="{{ url_for('player') }}">Audio Player</a>
-                    <a href="{{ url_for('details') }}">File Details</a>
-                    <a href="{{ url_for('waveform') }}">Waveform</a>
-                    <a href="{{ url_for('microphone') }}" class="active" aria-current="page">Live Microphone</a>
-                    <a href="{{ url_for('about') }}">About Us</a>
-                    
-                    {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a>
-                    {% else %}
-                        <a href="{{ url_for('login') }}">Login</a>
-                        <a href="{{ url_for('register') }}">Register</a>
-                    {% endif %}
-                </nav>
-            </div>
-        </header>
-
-        <main class="container py-4 py-md-5">
-            <!-- Flask Flash Messages Alert Area -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <section id="microphone" class="tab-page active" aria-labelledby="micTitle">
-                <div class="page-intro">
-                    <span class="eyebrow">LIVE INPUT</span>
-                    <h1 id="micTitle">Live Microphone</h1>
-                    <p>Watch live sound activity from your microphone.</p>
-                </div>
-
-                <div class="panel narrow">
-                    <div class="panel-icon">◉</div>
-                    <h2>Listen live</h2>
-                    <p id="micStatus" role="status">Microphone is off.</p>
-                    
-                    <button id="micButton" class="btn btn-success px-4" type="button">
-                        Start microphone
-                    </button>
-
-                    <p class="hint mt-3">
-                        The browser will ask for permission. Microphone access needs localhost or HTTPS. The live signal appears below when the microphone starts.
-                    </p>
-                </div>
-            </section>
-
-            <footer>
-                © SonicSentinel AI · Student project prototype · Sound classification requires a trained model.
-            </footer>
-        </main>
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+<h1>Live microphone monitoring</h1>
+<p id="status">Inactive. Audio is only captured after you press Start and allow permission.</p>
+<button id="start">Start monitoring</button> <button id="stop" disabled>Stop</button>
+<p id="result"></p>
+<script>
+let context, stream, source, processor, chunks=[];
+const status=document.querySelector('#status'), result=document.querySelector('#result');
+function wav(samples, rate) { const b=new ArrayBuffer(44+samples.length*2), v=new DataView(b); let p=0; const text=x=>{for(let i=0;i<x.length;i++)v.setUint8(p++,x.charCodeAt(i))}; text('RIFF'); v.setUint32(p,36+samples.length*2,true); text('WAVEfmt '); v.setUint32(p,16,true); v.setUint16(p,1,true); v.setUint16(p,1,true); v.setUint32(p,rate,true); v.setUint32(p,rate*2,true); v.setUint16(p,2,true); v.setUint16(p,16,true); text('data'); v.setUint32(p,samples.length*2,true); for(const x of samples){v.setInt16(p,Math.max(-1,Math.min(1,x))*32767,true);p+=2} return new Blob([b],{type:'audio/wav'}) }
+async function sendWindow() { if(!chunks.length)return; const count=chunks.reduce((n,x)=>n+x.length,0), merged=new Float32Array(count); let at=0; chunks.forEach(x=>{merged.set(x,at);at+=x.length}); chunks=[]; const form=new FormData(); form.append('audio',wav(merged,context.sampleRate),'live-window.wav'); const response=await fetch('/microphone/window',{method:'POST',body:form}); const data=await response.json(); if(data.error){result.textContent=data.error;return} result.innerHTML=`${data.event} - ${data.severity} - ${data.status}. <a href="${data.url}">Open analysis</a>`; }
+document.querySelector('#start').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({audio:true});context=new AudioContext();source=context.createMediaStreamSource(stream);processor=context.createScriptProcessor(4096,1,1);processor.onaudioprocess=e=>chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));source.connect(processor);processor.connect(context.destination);window.liveTimer=setInterval(sendWindow,3000);status.textContent='Active - sending a visible 3-second window for analysis.';start.disabled=true;stop.disabled=false}catch(e){status.textContent='Permission denied or microphone unavailable.'}};
+document.querySelector('#stop').onclick=async()=>{clearInterval(window.liveTimer);await sendWindow();processor.disconnect();source.disconnect();stream.getTracks().forEach(x=>x.stop());await context.close();status.textContent='Paused.';start.disabled=false;stop.disabled=true};
+</script>
+{% endblock %}
