@@ -24,5 +24,3 @@ def write_report(item, folder):
     )
     return path
 
-
-# verified

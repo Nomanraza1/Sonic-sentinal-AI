@@ -45,4 +45,3 @@ def audit(con, user_id, action, target_type=None, target_id=None, details=None):
     )
 
 
-# UPDATED VERIFIED

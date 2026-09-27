@@ -11,6 +11,3 @@ def test_critical_requires_repeat_and_agreement():
     )
     assert result["severity"] == "Critical"
     assert result["manual_review"] is False
-
-
-# VERIFIED

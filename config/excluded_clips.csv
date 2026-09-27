@@ -1,2 +1,3 @@
 filename,reason
-audio_dataset\originals\alarm_siren\alarm_siren_0226(1).wav,duplicate source clip
+audio_dataset\raw\alarm_siren\alarm_siren_0226.wav,duplicate
+audio_dataset\raw\person_asking_for_help\.DS_Store,unreadable

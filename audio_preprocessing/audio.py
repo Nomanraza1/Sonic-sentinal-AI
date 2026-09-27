@@ -65,4 +65,3 @@ def fingerprint_distance(one, two):
     return sum(a != b for a, b in zip(one, two))
 
 
-# updaTED

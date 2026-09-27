@@ -28,5 +28,3 @@ def make_images(y, sr, audio_id, folder):
     plt.close(fig)
     return waveform, spectrogram
 
-
-# verified

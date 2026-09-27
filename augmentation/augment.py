@@ -1,8 +1,9 @@
 import numpy as np
 
 
-def augment(y, sr):
-    yield y
-    yield np.roll(y, int(sr * 0.08))
-    yield y * 0.8
-    yield y + np.random.default_rng(7).normal(0, 0.003, len(y))
+def make_variants(y, sr, seed):
+    rng = np.random.default_rng(seed)
+    shift = int(rng.integers(-int(sr * 0.18), int(sr * 0.18) + 1))
+    noisy = y + rng.normal(0, 0.003, len(y))
+    quieter = y * float(rng.uniform(0.72, 0.92))
+    return {"shift": np.roll(y, shift), "noise": noisy, "volume": quieter}

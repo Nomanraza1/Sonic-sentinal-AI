@@ -32,7 +32,6 @@ def predict_python(features):
 
 
 def predict_gtm(y, sr):
-    # Expected TensorFlow/Keras export is documented in state.md.
     path = GTM_MODEL / "model.keras"
     labels = GTM_MODEL / "labels.json"
     if not path.exists() or not labels.exists():
@@ -41,7 +40,9 @@ def predict_gtm(y, sr):
         import tensorflow as tf
 
         model = tf.keras.models.load_model(path)
-        names = json.loads(labels.read_text())
+        names = json.loads(labels.read_text(encoding="utf-8"))
+        if names != SONIC_CLASSES:
+            return unavailable("GTM labels.json must contain the ten SonicSentinel classes in the configured order")
         clip = np.pad(y[: sr * 3], (0, max(0, sr * 3 - len(y))))[None, :, None]
         raw = model.predict(clip, verbose=0)[0]
         scores = {name: float(raw[i]) for i, name in enumerate(names)}

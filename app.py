@@ -36,7 +36,8 @@ from src.visuals import make_images
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "set-a-strong-secret-before-deployment"
-UPLOAD_DIR.mkdir(exist_ok=True)
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+init_db()
 
 
 def viewer():
@@ -160,7 +161,7 @@ def analyze(item, live=False):
         py = predict_python(extract_features(clip, sr))
         gtm = predict_gtm(clip, sr)
         overlap = sum(score >= 0.25 for score in py.get("scores", {}).values()) >= 2
-        result = decide(py, gtm, grade, overlap)
+        result = decide(py, gtm, grade, overlap, str(audio_id))
         if nearest[0] <= 8:
             result["manual_review"] = True
             result["alert_status"] = "Manual Review"
@@ -496,5 +497,4 @@ def export_csv():
 
 
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True)

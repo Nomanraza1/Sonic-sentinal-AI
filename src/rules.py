@@ -1,12 +1,12 @@
 import json
-from collections import deque
+from collections import defaultdict, deque
 from pathlib import Path
 from config.settings import ROOT
 
-recent = deque(maxlen=20)
+recent = defaultdict(lambda: deque(maxlen=20))
 
 
-def decide(py, gtm, quality, overlap):
+def decide(py, gtm, quality, overlap, stream_id="default"):
     rules = json.loads((ROOT / "alert_rules" / "default.json").read_text())
     default = rules["defaults"]
     label = py["class"] if py["available"] else (gtm["class"] if gtm["available"] else "unknown")
@@ -17,8 +17,9 @@ def decide(py, gtm, quality, overlap):
     margin = top_two[0] - top_two[1] if len(top_two) == 2 else 0
     agree = py["available"] and gtm["available"] and py["class"] == gtm["class"]
     confidence = py.get("confidence", 0)
-    repeat = sum(x == label for x in recent) + 1
-    recent.append(label)
+    history = recent[stream_id]
+    repeat = sum(x == label for x in history) + 1
+    history.append(label)
     review = (
         not py["available"]
         or not gtm["available"]
