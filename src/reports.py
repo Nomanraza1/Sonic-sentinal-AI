@@ -1,8 +1,9 @@
 from html import escape
 from pathlib import Path
+import base64
 
 
-def write_report(item, folder):
+def write_report(item, folder, images=()):
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / f"analysis_{item['detection_id']}.html"
@@ -18,8 +19,12 @@ def write_report(item, folder):
         + escape(item.get("gtm_scores", ""))
         + "</pre>"
     )
+    visuals = "".join(
+        f'<h2>{title}</h2><img style="max-width:100%" alt="{title}" src="data:image/png;base64,{base64.b64encode(Path(image).read_bytes()).decode()}" />'
+        for title, image in zip(("Waveform", "Spectrogram"), images)
+    )
     path.write_text(
-        f'<!doctype html><html><head><meta charset="utf-8"><title>SonicSentinel report</title><style>body{{font:16px Arial;margin:40px;color:#18332d}}table{{border-collapse:collapse;width:100%}}th,td{{padding:9px;border:1px solid #ddd;text-align:left}}th{{background:#eef8f2;width:32%}}pre{{white-space:pre-wrap}}</style></head><body><h1>SonicSentinel AI analysis report</h1><table>{rows}</table>{scores}</body></html>',
+        f'<!doctype html><html><head><meta charset="utf-8"><title>SonicSentinel report</title><style>body{{font:16px Arial;margin:40px;color:#18332d}}table{{border-collapse:collapse;width:100%}}th,td{{padding:9px;border:1px solid #ddd;text-align:left}}th{{background:#eef8f2;width:32%}}pre{{white-space:pre-wrap}}</style></head><body><h1>SonicSentinel AI analysis report</h1><table>{rows}</table>{scores}{visuals}</body></html>',
         encoding="utf-8",
     )
     return path

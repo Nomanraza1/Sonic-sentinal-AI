@@ -1,0 +1,194 @@
+{
+  "runtime_path": "C:\\Users\\IQRA TRADERS\\OneDrive\\Documents\\GitHub\\Sonic-sentinal AI\\tmp\\delivery_b1af47bb",
+  "model": "yamnet_transfer",
+  "gtm": "PENDING: no exported model",
+  "real_audio_flows": [
+    {
+      "class": "machinery_fault",
+      "predicted": "machinery_fault",
+      "seconds": 10.086161299986998,
+      "detection_id": 1
+    },
+    {
+      "class": "glass_breaking",
+      "predicted": "glass_breaking",
+      "seconds": 0.0729894999822136,
+      "detection_id": 2
+    },
+    {
+      "class": "alarm_siren",
+      "predicted": "alarm_siren",
+      "seconds": 0.08142970001790673,
+      "detection_id": 3
+    },
+    {
+      "class": "vehicle_horn",
+      "predicted": "vehicle_horn",
+      "seconds": 0.08212139998795465,
+      "detection_id": 4
+    },
+    {
+      "class": "animal_sound",
+      "predicted": "animal_sound",
+      "seconds": 0.0843243999988772,
+      "detection_id": 5
+    },
+    {
+      "class": "gunshot",
+      "predicted": "gunshot",
+      "seconds": 0.07897179998690262,
+      "detection_id": 6
+    },
+    {
+      "class": "panic_scream",
+      "predicted": "panic_scream",
+      "seconds": 0.09556159999920055,
+      "detection_id": 7
+    },
+    {
+      "class": "aggression",
+      "predicted": "panic_scream",
+      "seconds": 0.08137279999209568,
+      "detection_id": 8
+    },
+    {
+      "class": "person_asking_for_help",
+      "predicted": "person_asking_for_help",
+      "seconds": 0.09064179999404587,
+      "detection_id": 9
+    },
+    {
+      "class": "background_noise",
+      "predicted": "background_noise",
+      "seconds": 0.09013779999804683,
+      "detection_id": 10
+    }
+  ],
+  "performance": {
+    "30_second_audio_seconds": 0.7340079999994487,
+    "3_second_audio_seconds": 0.09802320000017062,
+    "dashboard_20000_records_seconds": 0.02657839999301359
+  },
+  "noise_probe": [
+    {
+      "class": "machinery_fault",
+      "snr_db": 20,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "machinery_fault",
+      "snr_db": 10,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "glass_breaking",
+      "snr_db": 20,
+      "predicted": "glass_breaking",
+      "correct": true
+    },
+    {
+      "class": "glass_breaking",
+      "snr_db": 10,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "alarm_siren",
+      "snr_db": 20,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "alarm_siren",
+      "snr_db": 10,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "vehicle_horn",
+      "snr_db": 20,
+      "predicted": "vehicle_horn",
+      "correct": true
+    },
+    {
+      "class": "vehicle_horn",
+      "snr_db": 10,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "animal_sound",
+      "snr_db": 20,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "animal_sound",
+      "snr_db": 10,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "gunshot",
+      "snr_db": 20,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "gunshot",
+      "snr_db": 10,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "panic_scream",
+      "snr_db": 20,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "panic_scream",
+      "snr_db": 10,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "aggression",
+      "snr_db": 20,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "aggression",
+      "snr_db": 10,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    },
+    {
+      "class": "person_asking_for_help",
+      "snr_db": 20,
+      "predicted": "person_asking_for_help",
+      "correct": true
+    },
+    {
+      "class": "person_asking_for_help",
+      "snr_db": 10,
+      "predicted": "person_asking_for_help",
+      "correct": true
+    },
+    {
+      "class": "background_noise",
+      "snr_db": 20,
+      "predicted": "background_noise",
+      "correct": true
+    },
+    {
+      "class": "background_noise",
+      "snr_db": 10,
+      "predicted": "person_asking_for_help",
+      "correct": false
+    }
+  ]
+}

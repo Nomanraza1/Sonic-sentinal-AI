@@ -2,6 +2,7 @@ import io
 import numpy as np
 import soundfile as sf
 import librosa
+import subprocess
 from config.settings import SAMPLE_RATE, SEGMENT_SECONDS, MAX_UPLOAD_BYTES, ALLOWED_EXTENSIONS
 
 
@@ -22,13 +23,36 @@ def validate_upload(name, raw):
     return info
 
 
+def prepare_upload(name, raw):
+    """Decode M4A through bundled FFmpeg before the shared validation pipeline."""
+    if name.rsplit(".", 1)[-1].lower() != "m4a":
+        return raw, validate_upload(name, raw)
+    if not raw or len(raw) > MAX_UPLOAD_BYTES:
+        raise ValueError("File is empty or exceeds 25 MB.")
+    try:
+        import imageio_ffmpeg
+        result = subprocess.run(
+            [imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-i", "pipe:0",
+             "-t", "31", "-f", "wav", "-acodec", "pcm_s16le", "pipe:1"],
+            input=raw, capture_output=True, timeout=20, check=True,
+        )
+        return result.stdout, validate_upload("decoded.wav", result.stdout)
+    except (ImportError, subprocess.SubprocessError, OSError) as exc:
+        raise ValueError("M4A decoding failed. Install imageio-ffmpeg and use a valid audio recording.") from exc
+
+
 def load_audio(path_or_bytes):
     y, sr = librosa.load(path_or_bytes, sr=SAMPLE_RATE, mono=True)
+    validate_signal(y)
     y, _ = librosa.effects.trim(y, top_db=35)
-    if not len(y) or np.max(np.abs(y)) < 0.005:
-        raise ValueError("Silent or unusable recording.")
+    validate_signal(y)
     y = librosa.util.normalize(y)
     return y, sr
+
+
+def validate_signal(y):
+    if not len(y) or not np.isfinite(y).all() or np.max(np.abs(y)) < 0.005:
+        raise ValueError("Silent or unusable recording.")
 
 
 def segments(y, sr=SAMPLE_RATE):

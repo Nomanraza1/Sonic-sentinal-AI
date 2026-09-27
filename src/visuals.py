@@ -5,6 +5,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import librosa
 import librosa.display
+import numpy as np
 
 
 def make_images(y, sr, audio_id, folder):
@@ -18,7 +19,7 @@ def make_images(y, sr, audio_id, folder):
     fig.tight_layout()
     fig.savefig(waveform, dpi=140)
     plt.close(fig)
-    mel = librosa.power_to_db(librosa.feature.melspectrogram(y=y, sr=sr), ref=max)
+    mel = librosa.power_to_db(librosa.feature.melspectrogram(y=y, sr=sr), ref=np.max)
     fig, ax = plt.subplots(figsize=(10, 3))
     image = librosa.display.specshow(mel, sr=sr, x_axis="time", y_axis="mel", ax=ax)
     fig.colorbar(image, ax=ax, format="%+2.0f dB")

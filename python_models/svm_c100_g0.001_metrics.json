@@ -1,0 +1,227 @@
+{
+  "validation": {
+    "accuracy": 0.7777777777777778,
+    "precision": 0.7674280936658052,
+    "recall": 0.7652777777777777,
+    "f1": 0.774684230716176,
+    "macro_f1": 0.7619986178924798,
+    "per_class": {
+      "machinery_fault": {
+        "precision": 0.6904761904761905,
+        "recall": 0.6444444444444445,
+        "f1-score": 0.6666666666666666,
+        "support": 45.0
+      },
+      "glass_breaking": {
+        "precision": 0.7924528301886793,
+        "recall": 0.9333333333333333,
+        "f1-score": 0.8571428571428571,
+        "support": 45.0
+      },
+      "alarm_siren": {
+        "precision": 0.7021276595744681,
+        "recall": 0.7333333333333333,
+        "f1-score": 0.717391304347826,
+        "support": 45.0
+      },
+      "vehicle_horn": {
+        "precision": 0.6,
+        "recall": 0.4,
+        "f1-score": 0.48,
+        "support": 45.0
+      },
+      "animal_sound": {
+        "precision": 0.7906976744186046,
+        "recall": 0.7555555555555555,
+        "f1-score": 0.7727272727272727,
+        "support": 45.0
+      },
+      "gunshot": {
+        "precision": 0.825,
+        "recall": 0.7333333333333333,
+        "f1-score": 0.7764705882352941,
+        "support": 45.0
+      },
+      "panic_scream": {
+        "precision": 0.8604651162790697,
+        "recall": 0.8222222222222222,
+        "f1-score": 0.8409090909090909,
+        "support": 45.0
+      },
+      "aggression": {
+        "precision": 0.8936170212765957,
+        "recall": 0.9333333333333333,
+        "f1-score": 0.9130434782608695,
+        "support": 45.0
+      },
+      "person_asking_for_help": {
+        "precision": 0.9861111111111112,
+        "recall": 0.9861111111111112,
+        "f1-score": 0.9861111111111112,
+        "support": 72.0
+      },
+      "background_noise": {
+        "precision": 0.5333333333333333,
+        "recall": 0.7111111111111111,
+        "f1-score": 0.6095238095238096,
+        "support": 45.0
+      },
+      "accuracy": 0.7777777777777778,
+      "macro avg": {
+        "precision": 0.7674280936658052,
+        "recall": 0.7652777777777777,
+        "f1-score": 0.7619986178924798,
+        "support": 477.0
+      },
+      "weighted avg": {
+        "precision": 0.7798063776721434,
+        "recall": 0.7777777777777778,
+        "f1-score": 0.774684230716176,
+        "support": 477.0
+      }
+    },
+    "critical_class_recall": {
+      "gunshot": 0.7333333333333333,
+      "glass_breaking": 0.9333333333333333,
+      "panic_scream": 0.8222222222222222,
+      "aggression": 0.9333333333333333,
+      "person_asking_for_help": 0.9861111111111112
+    },
+    "confusion_matrix": [
+      [
+        29,
+        3,
+        0,
+        2,
+        0,
+        1,
+        0,
+        0,
+        0,
+        10
+      ],
+      [
+        0,
+        42,
+        0,
+        1,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        33,
+        3,
+        1,
+        0,
+        2,
+        0,
+        1,
+        3
+      ],
+      [
+        4,
+        1,
+        9,
+        18,
+        4,
+        1,
+        1,
+        0,
+        0,
+        7
+      ],
+      [
+        1,
+        1,
+        3,
+        2,
+        34,
+        0,
+        0,
+        1,
+        0,
+        3
+      ],
+      [
+        1,
+        6,
+        1,
+        0,
+        0,
+        33,
+        0,
+        0,
+        0,
+        4
+      ],
+      [
+        1,
+        0,
+        1,
+        0,
+        3,
+        0,
+        37,
+        2,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        2,
+        42,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        71,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        3,
+        1,
+        3,
+        1,
+        1,
+        0,
+        32
+      ]
+    ],
+    "classes": [
+      "machinery_fault",
+      "glass_breaking",
+      "alarm_siren",
+      "vehicle_horn",
+      "animal_sound",
+      "gunshot",
+      "panic_scream",
+      "aggression",
+      "person_asking_for_help",
+      "background_noise"
+    ]
+  },
+  "test": null,
+  "status": "validation complete; choose a model before final test"
+}

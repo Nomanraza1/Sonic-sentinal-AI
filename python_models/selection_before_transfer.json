@@ -1,0 +1,18 @@
+{
+  "selected": "svm_c10_gscale",
+  "selection_metric": "validation macro_f1",
+  "feature_version": "mel-mfcc-v2",
+  "available_classes": [
+    "machinery_fault",
+    "glass_breaking",
+    "alarm_siren",
+    "vehicle_horn",
+    "animal_sound",
+    "gunshot",
+    "panic_scream",
+    "aggression",
+    "person_asking_for_help",
+    "background_noise"
+  ],
+  "missing_classes": []
+}

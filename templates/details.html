@@ -12,10 +12,16 @@
   <dt>Severity / alert</dt><dd>{{ item.severity }} / {{ item.alert_status }}</dd>
   <dt>Action</dt><dd>{{ item.recommended_action }}</dd>
 </dl>
+<h2>Recording metadata</h2><p>Audio ID {{item.audio_id}} | {{item.duration_s}} seconds | {{item.sample_rate}} Hz | {{item.channels}} channels | {{item.bit_depth}} | {{item.file_size}} bytes</p><p>Segment {{item.segment_start}}-{{item.segment_end}} seconds | {{item.created_at}}</p>
+<p>Top-class confidence difference: {{item.confidence_difference if item.confidence_difference is not none else 'Unavailable'}} | Top-two margin: {{item.top_two_margin}}</p>
+<p>Quality details: {{item.quality_details}}</p>
+{% if user.role in ['reviewer','operator','maintenance','admin'] %}<h2>Alert actions</h2>{% for action in ['Acknowledged','Dismissed','Escalated','Closed'] %}<form method="post" action="/alert/{{item.detection_id}}/{{action}}"><input type="hidden" name="csrf_token" value="{{csrf_token}}"><button>{{action}}</button></form>{% endfor %}{% endif %}
 <h2>Python model</h2>
 <p>{{ display.get(item.python_class, item.python_class) }} ({{ item.python_model_version or 'unavailable' }})</p>
 <ul>{% for label, score in item.python_scores|dictsort(by='value', reverse=true) %}<li>{{ display.get(label, label) }}: {{ '%.1f'|format(score * 100) }}%</li>{% endfor %}</ul>
 <h2>GTM model</h2>
 <p>{{ display.get(item.gtm_class, item.gtm_class) if item.gtm_class else 'Unavailable - model files not installed' }}</p>
+<ul>{% for label,score in item.gtm_scores|dictsort(by='value',reverse=true) %}<li>{{display.get(label,label)}}: {{'%.1f'|format(score*100)}}%</li>{% endfor %}</ul>
+{% if item.reviewer_decision %}<h2>Reviewer decision</h2><p>{{item.reviewer_decision}} - {{item.reviewer_comment}}</p>{% endif %}
 {% endblock %}
 <!-- VERIFIED -->

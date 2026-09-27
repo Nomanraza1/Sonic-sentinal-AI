@@ -1,5 +1,7 @@
 {
-  "selected": "gradient_boosting",
+  "selected": "yamnet_transfer",
+  "candidate": "svm_combined_c100",
+  "feature_version": "yamnet-mean-std-mfcc-v1",
   "selection_metric": "validation macro_f1",
   "available_classes": [
     "machinery_fault",
@@ -10,9 +12,8 @@
     "gunshot",
     "panic_scream",
     "aggression",
+    "person_asking_for_help",
     "background_noise"
   ],
-  "missing_classes": [
-    "person_asking_for_help"
-  ]
+  "missing_classes": []
 }

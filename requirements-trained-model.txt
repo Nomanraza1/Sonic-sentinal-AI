@@ -1,0 +1,5 @@
+-r requirements.txt
+scikit-learn==1.7.2
+joblib==1.5.2
+numpy==2.3.5
+tensorflow==2.20.0

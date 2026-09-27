@@ -1,0 +1,66 @@
+{
+  "defaults": {
+    "minimum_confidence": 0.65,
+    "top_two_margin": 0.12,
+    "required_quality": [
+      "Good",
+      "Acceptable"
+    ],
+    "repeat_windows": 2,
+    "require_model_agreement_for_critical": true,
+    "retention_days": 90,
+    "near_duplicate_distance": 8
+  },
+  "categories": {
+    "background_noise": {
+      "severity": "Informational",
+      "action": "Record environmental context.",
+      "critical": false
+    },
+    "vehicle_horn": {
+      "severity": "Low",
+      "action": "Record traffic or environmental event.",
+      "critical": false
+    },
+    "animal_sound": {
+      "severity": "Low",
+      "action": "Record context-dependent event.",
+      "critical": false
+    },
+    "machinery_fault": {
+      "severity": "High",
+      "action": "Notify maintenance and inspect equipment.",
+      "critical": true
+    },
+    "glass_breaking": {
+      "severity": "High",
+      "action": "Notify security and inspect area.",
+      "critical": true
+    },
+    "alarm_siren": {
+      "severity": "High",
+      "action": "Investigate alarm source.",
+      "critical": true
+    },
+    "aggression": {
+      "severity": "High",
+      "action": "Send security operator for review.",
+      "critical": true
+    },
+    "gunshot": {
+      "severity": "Critical",
+      "action": "Escalate immediately under local safety protocol.",
+      "critical": true
+    },
+    "panic_scream": {
+      "severity": "Critical",
+      "action": "Escalate immediately under local safety protocol.",
+      "critical": true
+    },
+    "person_asking_for_help": {
+      "severity": "Critical",
+      "action": "Escalate immediately under local safety protocol.",
+      "critical": true
+    }
+  }
+}

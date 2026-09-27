@@ -1,20 +1,52 @@
 import json
 from pathlib import Path
+from functools import lru_cache
 import joblib
 import numpy as np
 from config.class_map import SONIC_CLASSES
 from config.settings import PYTHON_MODELS, GTM_MODEL, ACTIVE_PYTHON_MODEL
+from feature_extraction.features import FEATURE_VERSION, extract_features
 
 
 def unavailable(reason):
     return {"available": False, "reason": reason, "class": None, "scores": {}}
 
 
-def predict_python(features):
-    path = PYTHON_MODELS / f"{ACTIVE_PYTHON_MODEL}.joblib"
+@lru_cache(maxsize=4)
+def cached_python_model(path, modified):
+    return joblib.load(path)
+
+
+def predict_python(features=None, *, waveform=None, sr=None):
+    selected = ACTIVE_PYTHON_MODEL
+    selection = PYTHON_MODELS / "selection.json"
+    if selection.exists():
+        selected = json.loads(selection.read_text(encoding="utf-8"))["selected"]
+    path = PYTHON_MODELS / f"{selected}.joblib"
     if not path.exists():
         return unavailable(f"Missing {path.name}")
-    model = joblib.load(path)
+    try:
+        model = cached_python_model(str(path), path.stat().st_mtime_ns)
+    except Exception as exc:
+        return unavailable(f"Python model could not be loaded: {type(exc).__name__}")
+    from feature_extraction.yamnet import FEATURE_VERSION as TRANSFER_VERSION
+
+    version = getattr(model, "feature_version_", None)
+    if version == TRANSFER_VERSION:
+        if waveform is None or sr is None:
+            return unavailable("The CNN model requires audio samples and a sample rate.")
+        try:
+            from feature_extraction.yamnet import extract_transfer_features
+
+            features = extract_transfer_features(waveform, sr)
+        except (ImportError, FileNotFoundError) as exc:
+            return unavailable(f"CNN model unavailable: {exc}")
+        if model.feature_view_ == "mean":
+            features = features[:, :1024]
+    elif version != FEATURE_VERSION:
+        return unavailable("Python model uses outdated features. Rerun extraction and training.")
+    elif features is None:
+        features = extract_features(waveform, sr)
     raw = model.predict_proba(features)[0]
     labels = list(model.classes_)
     scores = {
@@ -27,7 +59,7 @@ def predict_python(features):
         "class": label,
         "scores": scores,
         "confidence": scores[label],
-        "version": ACTIVE_PYTHON_MODEL,
+        "version": selected,
     }
 
 

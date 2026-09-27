@@ -182,3 +182,10 @@ cython_debug/
 /audio_dataset
 # .
 *.wav
+
+# Downloaded CNN base and reproducible experiment feature caches.
+/python_models/yamnet_base/
+/python_models/yamnet_base.tar.gz
+/data/transfer_experiment/
+/deliverables/
+/python_models/yamnet_base.tar.pending

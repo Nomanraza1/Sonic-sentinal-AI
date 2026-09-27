@@ -1,64 +1,45 @@
 import json
-from collections import defaultdict, deque
-from pathlib import Path
-from config.settings import ROOT
+import time
+from collections import OrderedDict
+from threading import Lock
+from config.settings import RULES_PATH
 
-recent = defaultdict(lambda: deque(maxlen=20))
+recent = OrderedDict()
+recent_lock = Lock()
 
 
 def decide(py, gtm, quality, overlap, stream_id="default"):
-    rules = json.loads((ROOT / "alert_rules" / "default.json").read_text())
+    rules = json.loads(RULES_PATH.read_text(encoding="utf-8"))
     default = rules["defaults"]
     label = py["class"] if py["available"] else (gtm["class"] if gtm["available"] else "unknown")
-    category = rules["categories"].get(
-        label, {"severity": "Informational", "action": "Route for review.", "critical": False}
-    )
+    category = rules["categories"].get(label, {"severity": "Informational", "action": "Route for review.", "critical": False})
     top_two = sorted(py.get("scores", {}).values(), reverse=True)[:2]
     margin = top_two[0] - top_two[1] if len(top_two) == 2 else 0
     agree = py["available"] and gtm["available"] and py["class"] == gtm["class"]
     confidence = py.get("confidence", 0)
-    history = recent[stream_id]
-    repeat = sum(x == label for x in history) + 1
-    history.append(label)
-    review = (
-        not py["available"]
-        or not gtm["available"]
-        or not agree
-        or confidence < default["minimum_confidence"]
-        or margin < default["top_two_margin"]
-        or quality in ("Poor", "Unusable")
-        or overlap
-    )
-    alert = (
-        category["critical"]
-        and confidence >= default["minimum_confidence"]
-        and quality in default["required_quality"]
-        and (not default["require_model_agreement_for_critical"] or agree)
-        and repeat >= default["repeat_windows"]
-    )
+    review = (not py["available"] or not gtm["available"] or not agree
+              or confidence < default["minimum_confidence"]
+              or margin < default["top_two_margin"]
+              or quality not in default["required_quality"] or overlap)
+    # Only consecutive eligible windows count; an uncertain window resets confirmation.
+    eligible = (py["available"] and confidence >= default["minimum_confidence"]
+                and margin >= default["top_two_margin"] and not overlap
+                and quality in default["required_quality"]
+                and (not default["require_model_agreement_for_critical"] or agree))
+    clock = time.monotonic()
+    with recent_lock:
+        previous, count, updated = recent.get(stream_id, (None, 0, 0))
+        repeat = (count + 1 if previous == label and clock - updated <= default.get("confirmation_seconds", 15) else 1) if eligible else 0
+        recent[stream_id] = (label, repeat, clock)
+        recent.move_to_end(stream_id)
+        while len(recent) > 1000:
+            recent.popitem(last=False)
+    alert = category["critical"] and eligible and repeat >= default["repeat_windows"]
     status = "Alert Generated" if alert else ("Manual Review" if review else "Classified")
-    match = (
-        "Acceptable Match"
-        if agree and not review
-        else (
-            "Model Disagreement"
-            if py["available"] and gtm["available"] and not agree
-            else "Uncertain Result"
-        )
-    )
-    return {
-        "final_class": label,
-        "severity": category["severity"],
-        "recommended_action": category["action"],
-        "manual_review": review,
-        "alert_status": status,
-        "agreement_status": match,
-        "confidence_difference": (
-            abs(py.get("confidence", 0) - gtm.get("confidence", 0)) if gtm["available"] else None
-        ),
-        "top_two_margin": margin,
-        "repeat_count": repeat,
-    }
-
-
-# verified
+    match = ("Acceptable Match" if agree and not review else "Weak Match" if agree
+             else "Model Disagreement" if py["available"] and gtm["available"] else "Uncertain Result")
+    return {"final_class": label, "severity": category["severity"],
+            "recommended_action": category["action"], "manual_review": review,
+            "alert_status": status, "agreement_status": match,
+            "confidence_difference": abs(py.get("confidence", 0) - gtm.get("confidence", 0)) if py["available"] and gtm["available"] else None,
+            "top_two_margin": margin, "repeat_count": repeat}

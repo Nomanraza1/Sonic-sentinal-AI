@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from augmentation.augment import make_variants
-from audio_preprocessing.audio import load_audio, segments
+from audio_preprocessing.audio import load_audio, segments, validate_signal
 from config.class_map import SONIC_CLASSES
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,11 +64,22 @@ def split_rows(rows):
     return train + valid + test
 
 
-def build(rows):
+def build(rows, ignored=None):
+    if ignored is None:
+        ignored = []
     output = []
     for number, row in enumerate(rows, 1):
-        y, sr = load_audio(row["source_path"])
+        try:
+            y, sr = load_audio(row["source_path"])
+        except (ValueError, OSError, EOFError) as exc:
+            ignored.append({"filename": row["source_path"], "reason": str(exc)})
+            continue
         for index, (clip, _, _) in enumerate(segments(y, sr)):
+            try:
+                validate_signal(clip)
+            except ValueError as exc:
+                ignored.append({"filename": f"{row['source_path']}#segment={index}", "reason": str(exc)})
+                continue
             name = f"{row['audio_id']}_{index:02d}.wav"
             path = PROCESSED / row["dataset_split"] / row["class_label"] / name
             write_clip(path, clip, sr)
@@ -91,7 +102,9 @@ def main():
     if PROCESSED.exists():
         for file in PROCESSED.rglob("*.wav"):
             file.unlink()
-    prepared = build(originals)
+    prepared = build(originals, ignored)
+    if not prepared:
+        raise ValueError("No usable audio segments remain.")
     fields = ["audio_id", "filename", "path", "source_path", "source_hash", "class_label", "duration", "sampling_rate", "channels", "dataset_split", "segment_index", "is_original", "augmentation"]
     for name, group in [("metadata_originals.csv", [x for x in prepared if x["is_original"]]), ("metadata_split.csv", prepared)]:
         with (DATA / name).open("w", newline="", encoding="utf-8") as stream:
