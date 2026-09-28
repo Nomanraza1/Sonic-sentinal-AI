@@ -1,35 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Live microphone monitoring</h1>
-<p id="status" role="status" aria-live="polite">Inactive. Audio is captured only after you press Start and grant permission.</p>
-<button id="start">Start monitoring</button> <button id="stop" disabled>Stop</button>
-<p id="result" aria-live="polite"></p><dl id="comparison"></dl>
+<div class="page-heading"><div><div class="eyebrow">Listen with intention</div><h1>Live microphone monitoring</h1><p class="subtitle">Capture short audio windows and review events as they arrive.</p></div><a class="button secondary" href="/history">Event history <svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M12 6l6 6-6 6"/></svg></a></div>
+<div class="split"><div class="panel monitor-panel"><div class="monitor-orb" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 8a6 6 0 0 0-6 6v10a6 6 0 0 0 12 0V14a6 6 0 0 0-6-6Z"/><path d="M12 22v2a12 12 0 0 0 24 0v-2M24 36v5m-7 0h14"/></svg></div><h2>Your microphone is in your control</h2><p id="status" role="status" aria-live="polite">Inactive. Audio is captured only after you press Start and grant permission.</p><div class="actions"><button id="start">Start monitoring</button><button class="secondary" id="stop" disabled>Stop</button></div><p class="help-note">The first window may take longer while the audio model loads.</p><p id="result" aria-live="polite"></p></div><div class="panel"><h2>Latest result</h2><p class="muted">Live event labels use GTM when it is available. Python remains visible for comparison.</p><dl id="comparison"></dl></div></div>
+<script src="{{url_for('static',filename='audio-wav.js')}}"></script>
 <script>
 const startButton=document.querySelector('#start'), stopButton=document.querySelector('#stop');
 const statusText=document.querySelector('#status'), result=document.querySelector('#result');
 const csrf={{csrf_token|tojson}};
 let context, stream, source, processor, timer, chunks=[], active=false, sending=false, pending;
-function wav(samples, rate) {
- const b=new ArrayBuffer(44+samples.length*2),v=new DataView(b);let p=0;
- const text=x=>{for(let i=0;i<x.length;i++)v.setUint8(p++,x.charCodeAt(i))};
- text('RIFF');v.setUint32(p,36+samples.length*2,true);text('WAVEfmt ');v.setUint32(p,16,true);v.setUint16(p,1,true);v.setUint16(p,1,true);v.setUint32(p,rate,true);v.setUint32(p,rate*2,true);v.setUint16(p,2,true);v.setUint16(p,16,true);text('data');v.setUint32(p,samples.length*2,true);
- for(const x of samples){v.setInt16(p,Math.max(-1,Math.min(1,x))*32767,true);p+=2}return new Blob([b],{type:'audio/wav'});
-}
 async function sendWindow() {
  if(!active || !chunks.length)return;
  if(sending){chunks=[];statusText.textContent='Active - processing is slower than capture; a window was skipped.';return;}
  const count=chunks.reduce((n,x)=>n+x.length,0),merged=new Float32Array(count);let at=0;
  chunks.forEach(x=>{merged.set(x,at);at+=x.length});chunks=[];sending=true;pending=new AbortController();
+ const rms=Math.sqrt(merged.reduce((sum,value)=>sum+value*value,0)/Math.max(merged.length,1));
+ const peak=merged.reduce((maximum,value)=>Math.max(maximum,Math.abs(value)),0);
+ const level=`Mic level RMS ${rms.toFixed(4)}, peak ${peak.toFixed(4)}.`;
+ statusText.textContent=`Analyzing audio. ${level}`;
  try {
-  const form=new FormData();form.append('audio',wav(merged,context.sampleRate),'live-window.wav');
+  const form=new FormData();form.append('audio',SonicAudio.encodeWav(merged,context.sampleRate),'live-window.wav');
   const response=await fetch('/microphone/window',{method:'POST',body:form,headers:{'X-CSRF-Token':csrf},signal:pending.signal});
   if(!response.headers.get('content-type')?.includes('application/json'))throw Error('Session expired. Sign in again.');
-  const data=await response.json();if(data.error)throw Error(data.error);if(!active)return;
+  const data=await response.json();if(data.error)throw Error(data.error);if(!response.ok)throw Error('Audio analysis failed. Please try again.');if(!active)return;
+  statusText.textContent='Active - listening and analyzing 3-second windows.';
   result.textContent=`${data.event} - ${data.severity} - ${data.status}. `;
   const link=document.createElement('a');link.href=data.url;link.textContent='Open analysis';result.append(link);
   const panel=document.querySelector('#comparison');panel.replaceChildren();
   for(const [label,value] of Object.entries(data.comparison||{})){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=String(value);panel.append(dt,dd);}
- } catch(e){if(e.name!=='AbortError')result.textContent=e.message;} finally {sending=false;pending=null;}
+ } catch(e){if(e.name!=='AbortError' && active){result.textContent=`Audio window was not analyzed: ${e.message}`;statusText.textContent=`Waiting for the next window. ${level}`;}} finally {sending=false;pending=null;}
 }
 async function stopMonitoring(message='Paused. Microphone released.') {
  active=false;clearInterval(timer);chunks=[];pending?.abort();
@@ -41,7 +39,11 @@ startButton.onclick=async()=>{
  startButton.disabled=true;
  try {
   if(!navigator.mediaDevices?.getUserMedia)throw Error('Microphone unavailable: use localhost or HTTPS.');
-  stream=await navigator.mediaDevices.getUserMedia({audio:true});
+  // Capture the acoustic signal as directly as the browser allows. Browser
+  // voice processing can erase or reshape the short sound cues used by YAMNet.
+  stream=await navigator.mediaDevices.getUserMedia({audio:{
+   echoCancellation:false, noiseSuppression:false, autoGainControl:false
+  }});
   const response=await fetch('/microphone/start',{method:'POST',headers:{'X-CSRF-Token':csrf}});
   if(!response.ok)throw Error('Unable to start monitoring. Reload and sign in again.');
   context=new AudioContext();await context.resume();source=context.createMediaStreamSource(stream);

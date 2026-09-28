@@ -1,73 +1,90 @@
 {
-  "runtime_path": "C:\\Users\\IQRA TRADERS\\OneDrive\\Documents\\GitHub\\Sonic-sentinal AI\\tmp\\delivery_8babd498",
+  "runtime_path": "C:\\Users\\IQRA TRADERS\\OneDrive\\Documents\\GitHub\\Sonic-sentinal AI\\tmp\\delivery_0b52d81a",
   "model": "yamnet_transfer",
-  "gtm": "PENDING: no exported model",
+  "gtm": "gtm_model_final",
+  "warmup": {
+    "seconds": 26.95014749999973,
+    "models": {
+      "python": true,
+      "gtm": true
+    }
+  },
   "real_audio_flows": [
     {
       "class": "machinery_fault",
-      "predicted": "machinery_fault",
-      "seconds": 16.166319499985548,
+      "python": "machinery_fault",
+      "gtm": "machinery_fault",
+      "seconds": 0.4284244999871589,
       "detection_id": 1
     },
     {
       "class": "glass_breaking",
-      "predicted": "glass_breaking",
-      "seconds": 0.08442239998839796,
+      "python": "glass_breaking",
+      "gtm": "alarm_siren",
+      "seconds": 0.29694229998858646,
       "detection_id": 2
     },
     {
       "class": "alarm_siren",
-      "predicted": "alarm_siren",
-      "seconds": 0.09376680001150817,
+      "python": "alarm_siren",
+      "gtm": "alarm_siren",
+      "seconds": 0.2926902000035625,
       "detection_id": 3
     },
     {
       "class": "vehicle_horn",
-      "predicted": "vehicle_horn",
-      "seconds": 0.08813339998596348,
+      "python": "vehicle_horn",
+      "gtm": "vehicle_horn",
+      "seconds": 0.27867659999174066,
       "detection_id": 4
     },
     {
       "class": "animal_sound",
-      "predicted": "animal_sound",
-      "seconds": 0.08891120000043884,
+      "python": "animal_sound",
+      "gtm": "animal_sound",
+      "seconds": 0.2832827999955043,
       "detection_id": 5
     },
     {
       "class": "gunshot",
-      "predicted": "gunshot",
-      "seconds": 0.08507329999702051,
+      "python": "gunshot",
+      "gtm": "gunshot",
+      "seconds": 0.42732569997315295,
       "detection_id": 6
     },
     {
       "class": "panic_scream",
-      "predicted": "panic_scream",
-      "seconds": 0.08975469999131747,
+      "python": "panic_scream",
+      "gtm": "panic_scream",
+      "seconds": 0.2783779000164941,
       "detection_id": 7
     },
     {
       "class": "aggression",
-      "predicted": "panic_scream",
-      "seconds": 0.09335449998616241,
+      "python": "panic_scream",
+      "gtm": "machinery_fault",
+      "seconds": 0.28403830001479946,
       "detection_id": 8
     },
     {
       "class": "person_asking_for_help",
-      "predicted": "person_asking_for_help",
-      "seconds": 0.09023339999839664,
+      "python": "person_asking_for_help",
+      "gtm": "person_asking_for_help",
+      "seconds": 0.27274660000693984,
       "detection_id": 9
     },
     {
       "class": "background_noise",
-      "predicted": "background_noise",
-      "seconds": 0.07981029999791645,
+      "python": "background_noise",
+      "gtm": "background_noise",
+      "seconds": 0.2728110000025481,
       "detection_id": 10
     }
   ],
   "performance": {
-    "30_second_audio_seconds": 0.9057828000222798,
-    "3_second_audio_seconds": 0.10685460001695901,
-    "dashboard_20000_records_seconds": 0.043365999998059124
+    "30_second_audio_seconds": 2.814039799995953,
+    "3_second_audio_seconds": 0.2821332000021357,
+    "dashboard_20000_records_seconds": 0.05218499997863546
   },
   "noise_probe": [
     {
@@ -190,5 +207,102 @@
       "predicted": "person_asking_for_help",
       "correct": false
     }
-  ]
+  ],
+  "model_comparison": [
+    {
+      "truth": "machinery_fault",
+      "python": "machinery_fault",
+      "gtm": "machinery_fault",
+      "python_confidence": 0.8093218930095925,
+      "gtm_confidence": 0.9999136924743652,
+      "agreement": true,
+      "manual_review": false
+    },
+    {
+      "truth": "glass_breaking",
+      "python": "glass_breaking",
+      "gtm": "alarm_siren",
+      "python_confidence": 0.9976200545457371,
+      "gtm_confidence": 0.39028725028038025,
+      "agreement": false,
+      "manual_review": true
+    },
+    {
+      "truth": "alarm_siren",
+      "python": "alarm_siren",
+      "gtm": "alarm_siren",
+      "python_confidence": 0.9499588514574856,
+      "gtm_confidence": 0.9999999403953552,
+      "agreement": true,
+      "manual_review": false
+    },
+    {
+      "truth": "vehicle_horn",
+      "python": "vehicle_horn",
+      "gtm": "vehicle_horn",
+      "python_confidence": 0.9863330651497907,
+      "gtm_confidence": 0.7061699032783508,
+      "agreement": true,
+      "manual_review": false
+    },
+    {
+      "truth": "animal_sound",
+      "python": "animal_sound",
+      "gtm": "animal_sound",
+      "python_confidence": 0.9730415147367715,
+      "gtm_confidence": 0.9936954379081726,
+      "agreement": true,
+      "manual_review": true
+    },
+    {
+      "truth": "gunshot",
+      "python": "gunshot",
+      "gtm": "gunshot",
+      "python_confidence": 0.9819222779825811,
+      "gtm_confidence": 0.9999639391899109,
+      "agreement": true,
+      "manual_review": false
+    },
+    {
+      "truth": "panic_scream",
+      "python": "panic_scream",
+      "gtm": "panic_scream",
+      "python_confidence": 0.9555537829931842,
+      "gtm_confidence": 0.6666151285171509,
+      "agreement": true,
+      "manual_review": false
+    },
+    {
+      "truth": "aggression",
+      "python": "panic_scream",
+      "gtm": "machinery_fault",
+      "python_confidence": 0.43294463164331926,
+      "gtm_confidence": 0.652216374874115,
+      "agreement": false,
+      "manual_review": true
+    },
+    {
+      "truth": "person_asking_for_help",
+      "python": "person_asking_for_help",
+      "gtm": "person_asking_for_help",
+      "python_confidence": 0.9973645679197061,
+      "gtm_confidence": 0.39897841215133667,
+      "agreement": true,
+      "manual_review": false
+    },
+    {
+      "truth": "background_noise",
+      "python": "background_noise",
+      "gtm": "background_noise",
+      "python_confidence": 0.7515604873252287,
+      "gtm_confidence": 0.978789746761322,
+      "agreement": true,
+      "manual_review": false
+    }
+  ],
+  "smoke_summary": {
+    "recordings": 10,
+    "python_correct": 9,
+    "gtm_correct": 8
+  }
 }

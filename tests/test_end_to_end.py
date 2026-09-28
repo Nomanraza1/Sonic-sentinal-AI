@@ -97,7 +97,8 @@ def test_upload_playback_visual_report_review_export(web,monkeypatch):
         assert rows[1]['alert_status']=='Alert Generated'
     for route in ['/','/dashboard','/history','/metrics','/profile','/review','/admin/settings',f'/detection/{did}',f'/audio/{did}']:
         assert client.get(route).status_code==200,route
-    assert b'yamnet_transfer' in client.get('/metrics').data
+    selected=json.loads((module.ROOT/'python_models/selection.json').read_text())['selected']
+    assert selected.encode() in client.get('/metrics').data
     for kind in ['waveform','spectrogram']:
         result=client.get(f'/visual/{did}/{kind}.png');assert result.status_code==200
         assert result.data.startswith(b'\x89PNG')
@@ -123,6 +124,46 @@ def test_other_user_cannot_read_recordings(web,monkeypatch):
     post(client,'/logout');login(web,name='other')
     for route in [f'/detection/{did}',f'/audio/{did}',f'/visual/{did}/waveform.png',f'/report/{did}']:
         assert client.get(route).status_code==403,route
+
+
+def test_visuals_are_reused_and_refreshed_when_audio_changes(web, monkeypatch):
+    import os
+    module, client, db = web
+    login(web)
+    stub_models(module, monkeypatch)
+    post(client, '/upload', {'audio': (io.BytesIO(audio()), 'cached.wav')})
+    with db.connect() as con:
+        row = con.execute('SELECT d.detection_id,a.stored_path FROM detections d JOIN audio_files a ON a.audio_id=d.audio_id').fetchone()
+    did = row['detection_id']
+    render = module.make_images
+    calls = []
+    def counted(*args, **kwargs):
+        calls.append(1)
+        return render(*args, **kwargs)
+    monkeypatch.setattr(module, 'make_images', counted)
+    assert client.get(f'/visual/{did}/waveform.png').status_code == 200
+    assert client.get(f'/visual/{did}/spectrogram.png').status_code == 200
+    assert client.get(f'/report/{did}').status_code == 200
+    assert len(calls) == 1
+    path = Path(row['stored_path'])
+    stamp = max(p.stat().st_mtime_ns for p in (module.RUNTIME_DIR / 'visuals').glob('*.png')) + 1_000_000
+    os.utime(path, ns=(stamp, stamp))
+    assert client.get(f'/visual/{did}/waveform.png').status_code == 200
+    assert len(calls) == 2
+
+
+def test_review_queue_is_bounded_and_paginated(web):
+    module, client, db = web
+    uid = login(web, 'reviewer')
+    with db.connect() as con:
+        aid = con.execute("INSERT INTO audio_files(uploaded_by,filename,stored_path,created_at) VALUES(?,?,?,?)",
+                          (uid, 'queue.wav', 'unused.wav', db.now())).lastrowid
+        con.executemany("INSERT INTO detections(audio_id,final_class,manual_review,created_at) VALUES(?,?,1,?)",
+                        [(aid, 'gunshot', db.now()) for _ in range(30)])
+    first = client.get('/review').data
+    second = client.get('/review?page=2').data
+    assert first.count(b'preload="none"') == 25
+    assert second.count(b'preload="none"') == 5
     assert b'private.wav' not in client.get('/history').data
     assert b'gunshot' not in client.get('/dashboard').data
 
@@ -135,7 +176,7 @@ def test_other_user_cannot_read_recordings(web,monkeypatch):
 def test_invalid_uploads_do_not_persist(web,name,raw):
     module,client,db=web;login(web)
     result=post(client,'/upload',{'audio':(io.BytesIO(raw),name)})
-    assert result.status_code==200 and b'class=error' in result.data
+    assert result.status_code==200 and b'class="error"' in result.data
     with db.connect() as con:assert con.execute('SELECT COUNT(*) FROM audio_files').fetchone()[0]==0
     assert not list(module.UPLOAD_DIR.iterdir())
 
@@ -159,6 +200,22 @@ def test_live_windows_share_confirmation_and_stop_capture_contract(web,monkeypat
     assert post(client,'/microphone/start').status_code==200
     third=post(client,'/microphone/window',{'audio':(io.BytesIO(audio()),'live.wav')})
     assert third.json['status']=='Classified'
+
+
+def test_live_event_uses_gtm_when_models_disagree(web,monkeypatch):
+    module,client,db=web;login(web);post(client,'/microphone/start')
+    monkeypatch.setattr(module,'predict_python',lambda **kwargs:prediction('person_asking_for_help'))
+    monkeypatch.setattr(module,'predict_gtm',lambda *args:prediction('aggression'))
+    response=post(client,'/microphone/window',{'audio':(io.BytesIO(audio(seconds=3)),'live.wav')})
+    assert response.status_code==200
+    assert response.json['event']=='aggression'
+    assert response.json['status']=='Manual Review'
+    assert response.json['comparison']['Python']=='person_asking_for_help'
+    assert response.json['comparison']['GTM']=='aggression'
+    assert response.json['comparison']['Live event source']=='GTM'
+    with db.connect() as con:
+        row=con.execute('SELECT final_class,python_class,gtm_class,severity FROM detections ORDER BY detection_id DESC LIMIT 1').fetchone()
+    assert tuple(row)==('aggression','person_asking_for_help','aggression','High')
 
 
 def test_missing_gtm_routes_for_review(web,monkeypatch):

@@ -6,8 +6,8 @@ Assistance requested included fixing silent-recording failures, comparing model 
 
 Affected areas include `audio_preprocessing/`, `feature_extraction/`, `python_models/`, `scripts/`, `notebooks/`, `app.py`, `src/`, `templates/`, `tests/`, `README.md`, and `reports/`. Git history records the actual changes.
 
-Verification on 2026-09-28: 31 automated tests passed; the saved Python model ran through Flask upload routes for all ten classes; upload/live timing and a 20,000-record dashboard check completed. Model archive SHA-256 checksums matched the current files and archived contents. GTM integration, physical microphone capture, and full submission acceptance remain pending.
+Verification on 2026-09-28: 37 automated tests passed. Both saved models ran through Flask upload routes for one existing test recording in each class. Warm upload/live timing and a 20,000-record dashboard check completed. The model archive SHA-256 checksums matched the current Python model files. GTM's 10-recording smoke result is not evidence of unseen accuracy. Physical microphone capture and full SRS acceptance remain pending.
 
-Final classification uses local trained model inference, not a generative-AI API. Synthetic test predictions exercise application logic only and are not model accuracy evidence.
+Final classification uses local trained model inference, not a generative-AI API. Automated rule tests use synthetic predictions to isolate application logic. The delivery smoke check uses real audio and model inference, but its ten selected examples are not an independent accuracy study.
 
 Student modifications and verifying team members: the team must record its own review, modifications, module ownership, and verification here before submission. Co-author trailers do not establish that every member has reviewed or understood every change. No student verification is asserted by this declaration.

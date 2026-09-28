@@ -1,6 +1,6 @@
 # SonicSentinel AI
 
-For saved-model setup, administrator provisioning and evaluator steps, see [the installation guide](documentation/INSTALLATION.md). See [delivery readiness](reports/delivery_readiness.md) for verified tests and remaining SRS gates. GTM integration and full submission acceptance are pending.
+For saved-model setup, administrator provisioning and evaluator steps, see [the installation guide](documentation/INSTALLATION.md). See [delivery readiness](reports/delivery_readiness.md) for the latest checks and remaining SRS work. The supplied GTM export is integrated as an independent second model. Its full 100-recording comparison and submission evidence still need to be completed.
 
 SonicSentinel AI is a Flask application for uploaded-audio analysis and visible, permission-based live microphone monitoring. It records independent Python-model and GTM-model predictions, compares their confidence, evaluates audio quality, applies alert rules, and routes uncertain events to review.
 
@@ -12,6 +12,8 @@ python app.py
 ```
 
 Open `http://127.0.0.1:5000`, then register an account.
+
+The server loads both audio models before accepting requests, so the first analysis avoids model-loading delay. Startup takes longer while the models warm up. Audio charts are cached, and the review queue is paginated. If an older server is still running, stop it with Ctrl+C and restart to load code changes. Set `SONIC_PORT` to use an alternative port.
 
 ## Dataset and Colab preparation
 
@@ -27,7 +29,7 @@ Use exactly these class folder names:
 
 `machinery_fault`, `glass_breaking`, `alarm_siren`, `vehicle_horn`, `animal_sound`, `gunshot`, `panic_scream`, `aggression`, `person_asking_for_help`, `background_noise`.
 
-After independently training the GTM model, place the converted Keras artifact at `gtm_model/model.keras` and an ordered JSON array of the same ten labels at `gtm_model/labels.json`. The app never sends the Python prediction to GTM.
+The supplied TensorFlow.js GTM export and its metadata are kept in `gtm_model/`. Run `python scripts/convert_gtm_tfjs.py` to rebuild the Python Keras artifact and ordered `labels.json` from the export. The app uses the metadata's 16 kHz, one-second log-mel windows, averages window probabilities for longer clips and sends the audio to GTM independently. It never sends the Python prediction to GTM. See [GTM integration notes](documentation/GTM_MODEL.md) for the input contract and validation limits.
 
 ## Audio CNN transfer learning
 
@@ -45,10 +47,19 @@ Source hashes are kept separate across the deterministic train/validation/test s
 
 For deployment, keep `python_models/yamnet_base/` together with the classifier and selection file. This base model is downloaded once during training; the app never downloads it automatically. Install the scikit-learn version recorded in the metrics when moving a joblib model between environments, or retrain there. To restore the prior model, copy `selection_before_transfer.json` over `selection.json`.
 
+## Saved splits and augmented YAMNet training
+
+Run `python python_models/train_augmented.py` to save original train/validation/test copies and training-only augmented WAVs under `audio_dataset/yamnet_augmented/`, extract frozen YAMNet features, and compare classifiers. This creates a separate `yamnet_augmented.joblib` without overwriting the existing model. Use `--reuse-audio` to resume from saved audio and cached features.
+
+See [the augmentation guide](documentation/AUGMENTED_TRAINING.md) for exact folder paths, the augmentation recipe, leakage checks and activation instructions. The Colab version is `notebooks/colab_augmented_training.ipynb`. Dataset files are local and Git-ignored, so they must be distributed separately.
+
 ## Tests
 
 ```powershell
 python -m pytest
+python scripts/verify_delivery.py
 ```
+
+The delivery check uses ten existing test recordings to exercise both models through the Flask upload flow, then records warm upload/live timings and a dashboard query against 20,000 synthetic rows. It is an integration smoke check, not the SRS's required evaluation on 100 unseen recordings.
 
 This is a controlled-test prototype and is not an emergency-response system.

@@ -12,6 +12,7 @@ import soundfile as sf
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 from pathlib import Path
+from threading import Lock
 from flask import (
     Flask,
     abort,
@@ -41,7 +42,11 @@ from database.db import audit, connect, init_db, now
 from src.models import predict_gtm, predict_python
 from src.reports import write_report
 from src.rules import decide
-from src.visuals import make_images
+
+def make_images(*args, **kwargs):
+    # Matplotlib is only needed for audio visuals, not navigation or sign-in.
+    from src.visuals import make_images as render_images
+    return render_images(*args, **kwargs)
 
 app = Flask(__name__)
 RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
@@ -213,7 +218,7 @@ def analyze(item, live=False):
         gtm = predict_gtm(clip, sr)
         overlap = sum(score >= 0.25 for score in py.get("scores", {}).values()) >= 2
         stream_id = f"live:{session['user_id']}:{session.get('monitor_id', 'default')}" if live else f"upload:{audio_id}"
-        result = decide(py, gtm, grade, overlap, stream_id)
+        result = decide(py, gtm, grade, overlap, stream_id, prefer_gtm=live)
         if not live and nearest[0] <= json.loads(RULES_PATH.read_text())["defaults"]["near_duplicate_distance"]:
             result["manual_review"] = True
             result["alert_status"] = "Manual Review"
@@ -353,7 +358,13 @@ def upload():
 def live_comparison(did):
     with connect() as con:
         row = con.execute("SELECT * FROM detections WHERE detection_id=?", (did,)).fetchone()
+    event_source = (
+        "GTM" if row["gtm_class"] and row["final_class"] == row["gtm_class"]
+        else "Python fallback" if row["python_class"]
+        else "Unavailable"
+    )
     return {"Python": row["python_class"] or "Unavailable", "GTM": row["gtm_class"] or "Unavailable",
+            "Live event source": event_source,
             "Python confidence": max(json.loads(row["python_scores"]).values(), default=0),
             "GTM confidence": max(json.loads(row["gtm_scores"]).values(), default=0),
             "Agreement": row["agreement_status"], "Quality": row["quality"],
@@ -435,8 +446,7 @@ def visual(did, kind):
             (did,),
         ).fetchone()
     authorize_audio(row)
-    y, sr = load_audio(row["stored_path"])
-    paths = make_images(y, sr, row["audio_id"], RUNTIME_DIR / "visuals")
+    paths = recording_images(row)
     path = paths[0 if kind == "waveform" else 1]
     return send_from_directory(path.parent, path.name)
 
@@ -451,9 +461,23 @@ def report(did):
         ).fetchone()
         authorize_audio(row)
         audit(con, session["user_id"], "report", "detection", did)
-    y, sr = load_audio(row["stored_path"])
-    images = make_images(y, sr, row["audio_id"], RUNTIME_DIR / "visuals")
+    images = recording_images(row)
     return send_file(write_report(dict(row), RUNTIME_DIR / "reports", images), as_attachment=True)
+
+
+visual_lock = Lock()
+
+
+def recording_images(row):
+    """Reuse charts for immutable recordings; serialize Matplotlib rendering."""
+    paths = tuple(RUNTIME_DIR / "visuals" / f"{row['audio_id']}_{kind}.png"
+                  for kind in ("waveform", "spectrogram"))
+    with visual_lock:
+        source_modified = Path(row["stored_path"]).stat().st_mtime_ns
+        if not all(path.exists() and path.stat().st_mtime_ns >= source_modified for path in paths):
+            y, sr = load_audio(row["stored_path"])
+            make_images(y, sr, row["audio_id"], RUNTIME_DIR / "visuals")
+    return paths
 
 
 @app.route("/history")
@@ -567,12 +591,14 @@ def review():
                 request.form["detection_id"],
             )
         return redirect(url_for("review"))
+    page = max(1, request.args.get("page", 1, type=int))
     with connect() as con:
         rows = con.execute(
-            "SELECT d.*,a.filename FROM detections d JOIN audio_files a ON a.audio_id=d.audio_id WHERE d.manual_review=1 AND d.reviewer_decision IS NULL"
+            "SELECT d.*,a.filename FROM detections d JOIN audio_files a ON a.audio_id=d.audio_id WHERE d.manual_review=1 AND d.reviewer_decision IS NULL ORDER BY d.created_at DESC LIMIT 25 OFFSET ?",
+            ((page - 1) * 25,),
         ).fetchall()
     return render_template(
-        "review.html", rows=rows, display=DISPLAY_NAMES, user=viewer()
+        "review.html", rows=rows, page=page, display=DISPLAY_NAMES, user=viewer()
     )
 
 
@@ -707,16 +733,20 @@ def create_user(username, email, role, password):
 
 
 def warmup_models():
-    """Load model weights before accepting interactive requests."""
+    """Load both audio models before accepting interactive requests."""
     import numpy as np
     waveform = (0.1 * np.sin(2 * np.pi * 440 * np.arange(22050 * 3) / 22050)).astype(np.float32)
-    result = predict_python(waveform=waveform, sr=22050)
-    if not result["available"]:
-        app.logger.warning("Python warm-up: %s", result.get("reason"))
-    return result["available"]
+    python_result = predict_python(waveform=waveform, sr=22050)
+    gtm_result = predict_gtm(waveform, 22050)
+    if not python_result["available"]:
+        app.logger.warning("Python warm-up: %s", python_result.get("reason"))
+    if not gtm_result["available"]:
+        app.logger.warning("GTM warm-up: %s", gtm_result.get("reason"))
+    return {"python": python_result["available"], "gtm": gtm_result["available"]}
 
 
 if __name__ == "__main__":
-    print("Loading the audio model before accepting requests...", flush=True)
+    # Load both classifiers once before accepting analysis requests.
+    # Disabling the reloader prevents duplicate model copies in memory.
     warmup_models()
-    app.run(debug=False)
+    app.run(debug=False, threaded=True, port=int(os.environ.get("SONIC_PORT", "5000")))

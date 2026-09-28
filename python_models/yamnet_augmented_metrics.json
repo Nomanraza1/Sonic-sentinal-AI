@@ -1,0 +1,473 @@
+{
+  "candidate": "svm_combined_c1",
+  "feature_version": "yamnet-mean-std-mfcc-v1",
+  "validation": {
+    "accuracy": 0.8951781970649895,
+    "precision": 0.8902550957881669,
+    "recall": 0.8897222222222222,
+    "f1": 0.8945807194677282,
+    "macro_f1": 0.8890888959691251,
+    "per_class": {
+      "machinery_fault": {
+        "precision": 0.9130434782608695,
+        "recall": 0.9333333333333333,
+        "f1-score": 0.9230769230769231,
+        "support": 45.0
+      },
+      "glass_breaking": {
+        "precision": 0.9166666666666666,
+        "recall": 0.9777777777777777,
+        "f1-score": 0.946236559139785,
+        "support": 45.0
+      },
+      "alarm_siren": {
+        "precision": 0.8723404255319149,
+        "recall": 0.9111111111111111,
+        "f1-score": 0.8913043478260869,
+        "support": 45.0
+      },
+      "vehicle_horn": {
+        "precision": 0.8461538461538461,
+        "recall": 0.7333333333333333,
+        "f1-score": 0.7857142857142857,
+        "support": 45.0
+      },
+      "animal_sound": {
+        "precision": 0.9523809523809523,
+        "recall": 0.8888888888888888,
+        "f1-score": 0.9195402298850575,
+        "support": 45.0
+      },
+      "gunshot": {
+        "precision": 0.8695652173913043,
+        "recall": 0.8888888888888888,
+        "f1-score": 0.8791208791208791,
+        "support": 45.0
+      },
+      "panic_scream": {
+        "precision": 0.8809523809523809,
+        "recall": 0.8222222222222222,
+        "f1-score": 0.8505747126436781,
+        "support": 45.0
+      },
+      "aggression": {
+        "precision": 0.9361702127659575,
+        "recall": 0.9777777777777777,
+        "f1-score": 0.9565217391304348,
+        "support": 45.0
+      },
+      "person_asking_for_help": {
+        "precision": 0.9861111111111112,
+        "recall": 0.9861111111111112,
+        "f1-score": 0.9861111111111112,
+        "support": 72.0
+      },
+      "background_noise": {
+        "precision": 0.7291666666666666,
+        "recall": 0.7777777777777778,
+        "f1-score": 0.7526881720430108,
+        "support": 45.0
+      },
+      "accuracy": 0.8951781970649895,
+      "macro avg": {
+        "precision": 0.8902550957881669,
+        "recall": 0.8897222222222222,
+        "f1-score": 0.8890888959691251,
+        "support": 477.0
+      },
+      "weighted avg": {
+        "precision": 0.8956809079762582,
+        "recall": 0.8951781970649895,
+        "f1-score": 0.8945807194677282,
+        "support": 477.0
+      }
+    },
+    "critical_class_recall": {
+      "gunshot": 0.8888888888888888,
+      "glass_breaking": 0.9777777777777777,
+      "panic_scream": 0.8222222222222222,
+      "aggression": 0.9777777777777777,
+      "person_asking_for_help": 0.9861111111111112
+    },
+    "confusion_matrix": [
+      [
+        42,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        44,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        41,
+        2,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        2,
+        33,
+        0,
+        1,
+        1,
+        1,
+        0,
+        5
+      ],
+      [
+        1,
+        0,
+        0,
+        1,
+        40,
+        0,
+        0,
+        0,
+        1,
+        2
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        0,
+        40,
+        0,
+        0,
+        0,
+        3
+      ],
+      [
+        1,
+        0,
+        2,
+        1,
+        2,
+        1,
+        37,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        44,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        71,
+        0
+      ],
+      [
+        1,
+        0,
+        1,
+        2,
+        0,
+        2,
+        2,
+        2,
+        0,
+        35
+      ]
+    ],
+    "classes": [
+      "machinery_fault",
+      "glass_breaking",
+      "alarm_siren",
+      "vehicle_horn",
+      "animal_sound",
+      "gunshot",
+      "panic_scream",
+      "aggression",
+      "person_asking_for_help",
+      "background_noise"
+    ]
+  },
+  "test": {
+    "accuracy": 0.8662420382165605,
+    "precision": 0.861626221329777,
+    "recall": 0.8621212121212121,
+    "f1": 0.8654419722623702,
+    "macro_f1": 0.8605984950705116,
+    "per_class": {
+      "machinery_fault": {
+        "precision": 0.8888888888888888,
+        "recall": 0.8888888888888888,
+        "f1-score": 0.8888888888888888,
+        "support": 45.0
+      },
+      "glass_breaking": {
+        "precision": 0.82,
+        "recall": 0.9111111111111111,
+        "f1-score": 0.8631578947368421,
+        "support": 45.0
+      },
+      "alarm_siren": {
+        "precision": 0.8809523809523809,
+        "recall": 0.8222222222222222,
+        "f1-score": 0.8505747126436781,
+        "support": 45.0
+      },
+      "vehicle_horn": {
+        "precision": 0.851063829787234,
+        "recall": 0.8888888888888888,
+        "f1-score": 0.8695652173913043,
+        "support": 45.0
+      },
+      "animal_sound": {
+        "precision": 0.8913043478260869,
+        "recall": 0.9111111111111111,
+        "f1-score": 0.9010989010989011,
+        "support": 45.0
+      },
+      "gunshot": {
+        "precision": 0.8333333333333334,
+        "recall": 0.8888888888888888,
+        "f1-score": 0.8602150537634409,
+        "support": 45.0
+      },
+      "panic_scream": {
+        "precision": 0.7959183673469388,
+        "recall": 0.8666666666666667,
+        "f1-score": 0.8297872340425532,
+        "support": 45.0
+      },
+      "aggression": {
+        "precision": 0.8809523809523809,
+        "recall": 0.8222222222222222,
+        "f1-score": 0.8505747126436781,
+        "support": 45.0
+      },
+      "person_asking_for_help": {
+        "precision": 0.984375,
+        "recall": 0.9545454545454546,
+        "f1-score": 0.9692307692307692,
+        "support": 66.0
+      },
+      "background_noise": {
+        "precision": 0.7894736842105263,
+        "recall": 0.6666666666666666,
+        "f1-score": 0.7228915662650602,
+        "support": 45.0
+      },
+      "accuracy": 0.8662420382165605,
+      "macro avg": {
+        "precision": 0.861626221329777,
+        "recall": 0.8621212121212121,
+        "f1-score": 0.8605984950705116,
+        "support": 471.0
+      },
+      "weighted avg": {
+        "precision": 0.8670990968118888,
+        "recall": 0.8662420382165605,
+        "f1-score": 0.8654419722623702,
+        "support": 471.0
+      }
+    },
+    "critical_class_recall": {
+      "gunshot": 0.8888888888888888,
+      "glass_breaking": 0.9111111111111111,
+      "panic_scream": 0.8666666666666667,
+      "aggression": 0.8222222222222222,
+      "person_asking_for_help": 0.9545454545454546
+    },
+    "confusion_matrix": [
+      [
+        40,
+        2,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        41,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        2,
+        37,
+        2,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        1,
+        40,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        41,
+        0,
+        2,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        2,
+        1,
+        0,
+        0,
+        40,
+        0,
+        0,
+        0,
+        2
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        2,
+        0,
+        39,
+        2,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        1,
+        2,
+        3,
+        37,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        63,
+        1
+      ],
+      [
+        0,
+        2,
+        0,
+        4,
+        1,
+        4,
+        3,
+        1,
+        0,
+        30
+      ]
+    ],
+    "classes": [
+      "machinery_fault",
+      "glass_breaking",
+      "alarm_siren",
+      "vehicle_horn",
+      "animal_sound",
+      "gunshot",
+      "panic_scream",
+      "aggression",
+      "person_asking_for_help",
+      "background_noise"
+    ]
+  },
+  "split_counts": {
+    "train": 10835,
+    "validation": 477,
+    "test": 471
+  },
+  "source_counts": {
+    "train": 2099,
+    "validation": 450,
+    "test": 450
+  },
+  "selection_metric": "validation macro_f1",
+  "prediction_rule": "probability argmax",
+  "augmentation": "training only: time shift, Gaussian noise at 20 dB and 10 dB SNR, volume scaling; validation/test original segments only",
+  "seed": 7,
+  "pretrained_model": "https://tfhub.dev/google/yamnet/1",
+  "feature_archive_sha256": "e082ce71705ad36464facc559fff8f2ac05b35c63f1387d5da64391b4352deb7",
+  "environment": {
+    "python": "3.13.9",
+    "numpy": "2.3.5",
+    "scikit_learn": "1.7.2",
+    "joblib": "1.5.2"
+  },
+  "status": "final test evaluation complete"
+}

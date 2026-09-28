@@ -1,3 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 # VERIFEID
+python_models/yamnet_augmented.joblib filter=lfs diff=lfs merge=lfs -text

@@ -17,6 +17,13 @@ def cached_python_model(path, modified):
     return joblib.load(path)
 
 
+@lru_cache(maxsize=2)
+def cached_gtm_model(path, modified):
+    import tensorflow as tf
+
+    return tf.keras.models.load_model(path, compile=False)
+
+
 def predict_python(features=None, *, waveform=None, sr=None):
     selected = ACTIVE_PYTHON_MODEL
     selection = PYTHON_MODELS / "selection.json"
@@ -65,18 +72,20 @@ def predict_python(features=None, *, waveform=None, sr=None):
 
 def predict_gtm(y, sr):
     path = GTM_MODEL / "model.keras"
-    labels = GTM_MODEL / "labels.json"
-    if not path.exists() or not labels.exists():
-        return unavailable("GTM model.keras or labels.json is missing")
+    if not path.exists() or not (GTM_MODEL / "metadata.json").exists():
+        return unavailable("GTM model.keras or metadata.json is missing")
     try:
-        import tensorflow as tf
+        from feature_extraction.gtm import extract_gtm_features, gtm_labels
 
-        model = tf.keras.models.load_model(path)
-        names = json.loads(labels.read_text(encoding="utf-8"))
-        if names != SONIC_CLASSES:
-            return unavailable("GTM labels.json must contain the ten SonicSentinel classes in the configured order")
-        clip = np.pad(y[: sr * 3], (0, max(0, sr * 3 - len(y))))[None, :, None]
-        raw = model.predict(clip, verbose=0)[0]
+        model = cached_gtm_model(str(path), path.stat().st_mtime_ns)
+        names = gtm_labels()
+        expected_shape = tuple(model.input_shape[1:])
+        features = extract_gtm_features(y, sr)
+        if tuple(features.shape[1:]) != expected_shape:
+            return unavailable(f"GTM input shape mismatch: expected {expected_shape}, received {features.shape[1:]}")
+        raw_windows = model.predict(features, verbose=0)
+        raw = np.mean(raw_windows, axis=0)
+        raw = raw / max(float(np.sum(raw)), 1e-12)
         scores = {name: float(raw[i]) for i, name in enumerate(names)}
         label = max(scores, key=scores.get)
         return {
@@ -84,7 +93,7 @@ def predict_gtm(y, sr):
             "class": label,
             "scores": scores,
             "confidence": scores[label],
-            "version": "gtm-model.keras",
+            "version": "gtm_model_final",
         }
     except Exception as e:
         return unavailable(f"GTM load failed: {e}")

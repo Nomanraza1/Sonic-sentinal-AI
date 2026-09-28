@@ -106,7 +106,7 @@ def candidates():
             StandardScaler(), SVC(C=c, gamma="scale", class_weight="balanced", probability=True, random_state=7))
 
 
-def train(activate=False):
+def train(activate=False, artifact="yamnet_transfer", augmentation="none; original segments only"):
     with np.load(RUN / "features.npz", allow_pickle=False) as source:
         x, y, split, ids = (source[name] for name in ("x", "y", "split", "audio_id"))
         if str(source["feature_version"]) != FEATURE_VERSION:
@@ -136,7 +136,6 @@ def train(activate=False):
     _, name, view, model = best
     values = x[:, :1024] if view == "mean" else x
     final = scores(y[masks["test"]], model.classes_[model.predict_proba(values[masks["test"]]).argmax(axis=1)], SONIC_CLASSES)
-    artifact = "yamnet_transfer"
     model.feature_version_ = FEATURE_VERSION
     model.feature_view_ = view
     joblib.dump(model, ROOT / "python_models" / f"{artifact}.joblib")
@@ -144,7 +143,7 @@ def train(activate=False):
               "test": final, "split_counts": {k: int(v.sum()) for k, v in masks.items()},
               "source_counts": {k: len(set(ids[v])) for k, v in masks.items()},
               "selection_metric": "validation macro_f1", "prediction_rule": "probability argmax",
-              "augmentation": "none; original segments only", "seed": 7,
+              "augmentation": augmentation, "seed": 7,
               "pretrained_model": "https://tfhub.dev/google/yamnet/1",
               "feature_archive_sha256": hashlib.sha256((RUN / "features.npz").read_bytes()).hexdigest(),
               "environment": {"python": platform.python_version(), "numpy": np.__version__,
