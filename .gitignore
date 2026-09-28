@@ -189,3 +189,6 @@ cython_debug/
 /data/transfer_experiment/
 /deliverables/
 /python_models/yamnet_base.tar.pending
+
+# Disposable delivery verification databases and rendered inspection files.
+/tmp/

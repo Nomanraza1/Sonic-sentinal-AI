@@ -1,5 +1,7 @@
 # SonicSentinel AI
 
+For saved-model setup, administrator provisioning and evaluator steps, see [the installation guide](documentation/INSTALLATION.md). See [delivery readiness](reports/delivery_readiness.md) for verified tests and remaining SRS gates. GTM integration and full submission acceptance are pending.
+
 SonicSentinel AI is a Flask application for uploaded-audio analysis and visible, permission-based live microphone monitoring. It records independent Python-model and GTM-model predictions, compares their confidence, evaluates audio quality, applies alert rules, and routes uncertain events to review.
 
 ## Run locally
