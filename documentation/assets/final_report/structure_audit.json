@@ -1,0 +1,31 @@
+{
+  "checked_on": "2026-09-29",
+  "required_files": {
+    "README.md": true,
+    "AI_USAGE.md": true,
+    "requirements.txt": true,
+    "LICENSE": true
+  },
+  "required_directories": {
+    "src": true,
+    "templates": true,
+    "static": true,
+    "data": true,
+    "audio_dataset": true,
+    "notebooks": true,
+    "python_models": true,
+    "gtm_model": true,
+    "feature_extraction": true,
+    "audio_preprocessing": true,
+    "augmentation": true,
+    "alert_rules": true,
+    "database": true,
+    "tests": true,
+    "sample_audio": true,
+    "documentation": true,
+    "screenshots": true,
+    "reports": true,
+    "config": true
+  },
+  "note": "Directory presence does not establish completeness of datasets, screenshots, video, training evidence or unseen evaluation."
+}

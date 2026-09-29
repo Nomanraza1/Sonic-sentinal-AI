@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-29",
+  "pages": 32,
+  "figures": 14,
+  "tables": 21,
+  "words_approx": 8316,
+  "em_dash_count": 0,
+  "sha256": "8b3e7d9f2d1f25ba87b9a971778f21c76f83438544685ac29ac16ff4ac4d5736",
+  "same_content_at_original_filename": true,
+  "required_structure_present": true,
+  "regression_result": "38 passed in 65.56 seconds",
+  "render": "render_docx.py with locally extracted LibreOffice 26.2.6 and bundled Poppler",
+  "visual_review": "All page bodies inspected, including comparison of unchanged page bodies across render revisions; no clipping or orphan spill pages remain."
+}

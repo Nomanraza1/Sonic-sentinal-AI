@@ -1,0 +1,12 @@
+{
+  "machinery_fault": 300,
+  "glass_breaking": 300,
+  "alarm_siren": 300,
+  "vehicle_horn": 300,
+  "animal_sound": 300,
+  "gunshot": 300,
+  "panic_scream": 300,
+  "aggression": 300,
+  "person_asking_for_help": 299,
+  "background_noise": 300
+}
